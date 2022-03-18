@@ -5,8 +5,12 @@
 
 
 int stackInit(Stack* pStack) {
-	printf("Hello, World!\nI'm using LIST!\n");
+	printf("I'm using LIST!\n");
 	return 0;
+}
+
+void stackFree(Stack* pStack) {
+	printf("Stack was cleaned!\n");
 }
 
 

@@ -11,4 +11,6 @@
 #else
 #include "list.h"
 #endif
+
 #include "stack.h"
+#include "funcs.h"

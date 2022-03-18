@@ -1,6 +1,10 @@
 *.idea/
 *cmake-build-debug/
 *CMakeLists.txt
+*.sln
+*.vcxproj*
+*x64/
+*.vs/
 1_lab/v1
 1_lab/v2
 1_lab/v3

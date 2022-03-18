@@ -1,0 +1,9 @@
+*.idea/
+*cmake-build-debug/
+*CMakeLists.txt
+1_lab/v1
+1_lab/v2
+1_lab/v3
+2_lab/v1
+2_lab/v1.1
+2_lab/v1.2

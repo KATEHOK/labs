@@ -1,6 +1,6 @@
 #pragma once
 #define _CRTDBG_MAP_ALLOC
-#define VECTOR
+//#define VECTOR
 #define A_H
 #include <stdlib.h>
 #include <stdio.h>

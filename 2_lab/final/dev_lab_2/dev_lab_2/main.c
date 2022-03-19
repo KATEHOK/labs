@@ -12,6 +12,27 @@ int main() {
 	if (status == 1)
 		return 0;
 
+	/*
+	char s = 'S', c = 'C', p = 'P';
+	char t = 'T', d = 'D', r = 'R';
+
+	char *ps = &s, *pc = &c, *pp = &p;
+	char *pt = &t, *pd = &d, *pr = &r;
+
+	status = stackPush(&stackMain, ps);
+	status = stackCopy(&stackMain, &pc);
+
+	status = stackPush(&stackMain, pt);
+	status = stackCopy(&stackMain, &pd);
+
+	status = stackPop(&stackMain, &pr);
+	status = stackPop(&stackMain, &pp);
+	
+
+	printf("%c %c %c\n", *ps, *pc, *pp);
+	printf("%c %c %c\n", *pt, *pd, *pr);
+	*/
+
 
 	// освобождаем память
 	stacksFree(&stackMain, &stackSupport, &stackBracket, &stackFragment);

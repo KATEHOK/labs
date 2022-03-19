@@ -48,17 +48,6 @@ int getInt(int* pNum) {
 int stacksInit(Stack* pMain, Stack* pSupport, Stack* pBracket, Stack* pFragment, int* pLen) {
     int status;
 
-#ifdef VECTOR
-    printf("Enter length of vector\n");
-    status = getNat(pLen);
-    if (status == 1) {
-        printf("|-> Length of vector was NOT set!\n");
-        return 0;
-    }
-#else
-    * pLen = 128;
-#endif
-
     status = stackInit(pMain, *pLen);
     if (status == 1) {
         printf("|-> stackMain was NOT inited!\n");
@@ -93,4 +82,41 @@ void stacksFree(Stack* pMain, Stack* pSupport, Stack* pBracket, Stack* pFragment
     stackFree(pSupport);
     stackFree(pBracket);
     stackFree(pFragment);
+}
+
+int setFormula(char** ppFormula, int* pLen) {
+    int status, i;
+    char* pSupport;
+    *pLen = 131;
+    pSupport = (char*)malloc((*pLen) * sizeof(char));
+    if (pSupport == NULL) {
+        printf("|-> Memory request was declined!\n");
+        return 1;
+    }
+    printf("Enter infix formula without spaces\n");
+    status = scanf_s("%128s", pSupport + 1, (int)(((*pLen) - 1) * sizeof(char)));
+    pSupport[0] = '(';
+    pSupport[(*pLen) - 1] = '\0';
+    i = 0;
+    while (pSupport[i] != '\0')
+        i++;
+    if (i == (*pLen) - 1) {
+        printf("|-> Wrong size of string!\n");
+        free(pSupport);
+        return 1;
+    }
+    pSupport[i] = ')';
+    pSupport[i + 1] = '\0';
+    i += 2;
+    *ppFormula = (char*)malloc(i * sizeof(char));
+    if (*ppFormula == NULL) {
+        printf("|-> Memory request was declined!\n");
+        free(pSupport);
+        return 1;
+    }
+    strcpy_s(*ppFormula, i * sizeof(char), pSupport, ((*pLen) - 1) * sizeof(char));
+    *pLen = i;
+    free(pSupport);
+    printf("Formula will be compiled = %s\n", *ppFormula);
+    return 0;
 }

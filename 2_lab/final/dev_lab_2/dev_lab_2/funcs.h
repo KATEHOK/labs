@@ -54,3 +54,14 @@ int stacksInit(Stack*, Stack*, Stack*, Stack*, int*);
 * (Stack*) pFragment - указатель на стек фрагментов.
 */
 void stacksFree(Stack*, Stack*, Stack*, Stack*);
+
+/*
+* Запрашивает и устанавливает формулу, определяет длину стека-вектора.
+* Параметры:
+* (char**) ppFormula - указатель на массив (на строку);
+* (int*) pLen - указатель на длину массива.
+* Вернет:
+* 0 - успешно;
+* 1 - неуспешно.
+*/
+int setFormula(char**, int*);

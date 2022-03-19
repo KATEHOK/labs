@@ -316,3 +316,35 @@ int processParam(Stack* pMain, Stack* pFragment, char* pData, int previous) {
     }
     return 0;
 }
+
+int printCompiled(Stack* pMain, Stack* pSupport, int len) {
+    char *pData, *pCompiled, *pCounter;
+    int status;
+    status = stackPop(pMain, &pData);
+    while(status == 0) {
+        status = stackPush(pSupport, pData);
+        if (status > 0) {
+            printf("Error with pushing!\n");
+            return 1;
+        }
+        status = stackPop(pMain, &pData);
+    }
+    pCompiled = (char*)malloc(len * sizeof(char));
+    if (pCompiled == NULL) {
+        printf("Memory request was declined!\n");
+        return 1;
+    }
+    pCounter = pCompiled;
+    status = stackPop(pSupport, &pData);
+    while (status == 0) {
+        if (*pData != '(' && *pData != ')') {
+            *pCounter = *pData;
+            pCounter++;
+        }
+        status = stackPop(pSupport, &pData);
+    }
+    *pCounter = '\0';
+    printf("Compiled = %s\n", pCompiled);
+    free(pCompiled);
+    return 0;
+}

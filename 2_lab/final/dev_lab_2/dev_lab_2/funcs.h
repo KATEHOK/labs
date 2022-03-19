@@ -127,3 +127,14 @@ int processMulDiv(Stack*, Stack*, Stack*, char*);
 * 1 - неуспешно.
 */
 int processParam(Stack*, Stack*, char*, int);
+
+/*
+* Печатает скомпилированную формулу.
+* (Stack*) pMain - указатель на основной стек;
+* (Stack*) pSupport - указатель на стек временного размещения;
+* (int) len - длина формулы (массива).
+* Вернет:
+* 0 - успешно;
+* 1 - неуспешно.
+*/
+int printCompiled(Stack*, Stack*, int);

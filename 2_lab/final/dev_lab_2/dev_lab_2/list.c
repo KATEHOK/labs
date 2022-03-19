@@ -5,7 +5,6 @@
 
 
 int stackInit(Stack* pStack, int len) {
-	printf("I'm using LIST!\n");
 	pStack->pRelease = (Release*)malloc(sizeof(Release));
 	if (pStack->pRelease == NULL) {
 		printf("|-> Memory request was declined!\n");
@@ -21,7 +20,6 @@ void stackFree(Stack* pStack) {
 	while (status == 0)
 		status = stackPop(pStack, &pTrash);
 	free(pStack->pRelease);
-	printf("Stack was cleaned!\n");
 }
 
 int stackPush(Stack* pStack, char* pData) {

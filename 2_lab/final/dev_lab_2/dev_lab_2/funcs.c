@@ -55,43 +55,29 @@ int stacksInit(Stack* pMain, Stack* pSupport, Stack* pBracket, Stack* pFragment,
         printf("|-> Length of vector was NOT set!\n");
         return 0;
     }
+#else
+    * pLen = 128;
 #endif
 
-    status = stackInit(pMain
-#ifdef VECTOR
-        , *pLen
-#endif
-    );
+    status = stackInit(pMain, *pLen);
     if (status == 1) {
         printf("|-> stackMain was NOT inited!\n");
         return 1;
     }
-    status = stackInit(pSupport
-#ifdef VECTOR
-        , *pLen
-#endif
-    );
+    status = stackInit(pSupport, *pLen);
     if (status == 1) {
         printf("|-> stackSupport was NOT inited!\n");
         stackFree(pMain);
         return 1;
     }
-    status = stackInit(pBracket
-#ifdef VECTOR
-        , *pLen
-#endif
-    );
+    status = stackInit(pBracket, *pLen);
     if (status == 1) {
         printf("|-> stackBracket was NOT inited!\n");
         stackFree(pMain);
         stackFree(pSupport);
         return 1;
     }
-    status = stackInit(pFragment
-#ifdef VECTOR
-        , *pLen
-#endif
-    );
+    status = stackInit(pFragment, *pLen);
     if (status == 1) {
         printf("|-> stackFragment was NOT inited!\n");
         stackFree(pMain);

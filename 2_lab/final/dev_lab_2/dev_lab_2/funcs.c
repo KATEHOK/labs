@@ -120,3 +120,199 @@ int setFormula(char** ppFormula, int* pLen) {
     printf("Formula will be compiled = %s\n", *ppFormula);
     return 0;
 }
+
+int processOpenBracket(Stack* pMain, Stack* pBracket, Stack* pFragment, char* pData, int previous) {
+    int status;
+    char* pTrash;
+    if (previous == 2) {
+        status = stackPop(pFragment, &pTrash);
+        if (status == 1) {
+            printf("|-> Error with process open bracket!\n");
+            return 1;
+        }
+        status = stackPush(pFragment, pData);
+        if (status == 1) {
+            printf("|-> Error with process open bracket!\n");
+            return 1;
+        }
+    }
+    else if (previous == 0) {
+        status = stackPush(pFragment, pData);
+        if (status == 1) {
+            printf("|-> Error with process open bracket!\n");
+            return 1;
+        }
+    }
+    status = stackPush(pMain, pData);
+    if (status > 0) {
+        printf("|-> Error with process open bracket!\n");
+        return 1;
+    }
+    status = stackPush(pBracket, pData);
+    if (status > 0) {
+        printf("|-> Error with process open bracket!\n");
+        return 1;
+    }
+    return 0;
+}
+
+int processCloseBracket(Stack* pBracket, Stack* pFragment) {
+    int status;
+    char* pTrash;
+    status = stackPop(pFragment, &pTrash);
+    if (status == 1) {
+        printf("|-> Error with process close bracket!\n");
+        return 1;
+    }
+    status = stackPop(pBracket, &pTrash);
+    if (status == 1) {
+        printf("|-> Error with process close bracket!\n");
+        return 1;
+    }
+    return 0;
+}
+
+int processPlusMinus(Stack* pMain, Stack* pSupport, Stack* pBracket, char* pData) {
+    int status;
+    char* pLastBracket, * pTmp;
+    status = stackPush(pSupport, pData);
+    if (status > 0) {
+        printf("|-> Error with process plus minus!\n");
+        return 1;
+    }
+    status = stackCopy(pBracket, &pLastBracket);
+    if (status == 1) {
+        printf("|-> Error with process plus minus!\n");
+        return 1;
+    }
+    status = stackPop(pMain, &pTmp);
+    if (status == 1) {
+        printf("|-> Error with process plus minus!\n");
+        return 1;
+    }
+    while (pTmp != pLastBracket) {
+        status = stackPush(pSupport, pTmp);
+        if (status > 0) {
+            printf("|-> Error with process plus minus!\n");
+            return 1;
+        }
+        status = stackPop(pMain, &pTmp);
+        if (status == 1) {
+            printf("|-> Error with process plus minus!\n");
+            return 1;
+        }
+    }
+    status = stackPush(pMain, pLastBracket);
+    if (status > 0) {
+        printf("|-> Error with process plus minus!\n");
+        return 1;
+    }
+    status = stackPush(pMain, pData);
+    if (status > 0) {
+        printf("|-> Error with process plus minus!\n");
+        return 1;
+    }
+    status = stackPop(pSupport, &pTmp);
+    if (status == 1) {
+        printf("|-> Error with process plus minus!\n");
+        return 1;
+    }
+    while (pTmp != pData) {
+        status = stackPush(pMain, pTmp);
+        if (status > 0) {
+            printf("|-> Error with process plus minus!\n");
+            return 1;
+        }
+        status = stackPop(pSupport, &pTmp);
+        if (status == 1) {
+            printf("|-> Error with process plus minus!\n");
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int processMulDiv(Stack* pMain, Stack* pSupport, Stack* pFragment, char* pData) {
+    char* pLastFragment, * pTmp = NULL;
+    int status;
+    status = stackPop(pFragment, &pLastFragment);
+    if (status == 1) {
+        printf("|-> Error with process mul div!\n");
+        return 1;
+    }
+    status = stackPush(pSupport, pData);
+    if (status > 0) {
+        printf("|-> Error with process mul div!\n");
+        return 1;
+    }
+    while (pTmp != pLastFragment) {
+        status = stackPop(pMain, &pTmp);
+        if (status == 1) {
+            printf("|-> Error with process mul div!\n");
+            return 1;
+        }
+        status = stackPush(pSupport, pTmp);
+        if (status > 0) {
+            printf("|-> Error with process mul div!\n");
+            return 1;
+        }
+    }
+    status = stackPush(pMain, pData);
+    if (status > 0) {
+        printf("|-> Error with process mul div!\n");
+        return 1;
+    }
+    status = stackPop(pSupport, &pTmp);
+    if (status == 1) {
+        printf("|-> Error with process mul div!\n");
+        return 1;
+    }
+    while (pData != pTmp) {
+        status = stackPush(pMain, pTmp);
+        if (status > 0) {
+            printf("|-> Error with process mul div!\n");
+            return 1;
+        }
+        status = stackPop(pSupport, &pTmp);
+        if (status == 1) {
+            printf("|-> Error with process mul div!\n");
+            return 1;
+        }
+    }
+    status = stackPush(pFragment, pData);
+    if (status > 0) {
+        printf("|-> Error with process mul div!\n");
+        return 1;
+    }
+    return 0;
+}
+
+int processParam(Stack* pMain, Stack* pFragment, char* pData, int previous) {
+    int status;
+    char* pTrash;
+    status = stackPush(pMain, pData);
+    if (status > 0) {
+        printf("|-> Error with process parameter!\n");
+        return 1;
+    }
+    if (previous == 0) {
+        status = stackPush(pFragment, pData);
+        if (status > 0) {
+            printf("|-> Error with process parameter!\n");
+            return 1;
+        }
+    }
+    else if (previous == 2) {
+        status = stackPop(pFragment, &pTrash);
+        if (status == 1) {
+            printf("|-> Error with process parameter!\n");
+            return 1;
+        }
+        status = stackPush(pFragment, pData);
+        if (status > 0) {
+            printf("|-> Error with process parameter!\n");
+            return 1;
+        }
+    }
+    return 0;
+}

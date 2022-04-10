@@ -44,8 +44,8 @@ struct KeySpace2 {
 
 typedef struct {
 	// указатели на пространства ключей
-	struct KeySpace1* ks1;
-	struct KeySpace2* ks2;
+	struct KeySpace1* pKS1;
+	struct KeySpace2* pKS2;
 	// максимальные размеры пространств ключей
 	int maxSize1;
 	int maxSize2;
@@ -65,3 +65,6 @@ void tableDeleteItemBySingle(Table*, int);
 int tablePrint(Table*);
 
 int setMaxSizeKS(int*, int);
+int searchKS1(Table*, int);
+int deleteKS1(Table*, int);
+int insertKS1(Table*, int, Item*);

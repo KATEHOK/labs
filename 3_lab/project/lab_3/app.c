@@ -5,7 +5,7 @@
 
 
 int main() {
-	int status;
+	int status, key;
 	Table table;
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	printf("Developed by KATEHOK (https://github.com/KATEHOK)\nPlease enjoy!\n\n");
@@ -50,7 +50,15 @@ int main() {
 	status = deleteKS1(&table, 60);
 	printf("Delete 60: %d\n", status);
 	*/
+	Item item;
 
+	for (int i = 0; i < 20; i++)
+		printf("<%d> h(%d) %d\n", i, getHash(i, table.maxSize2), insertKS2(&table, i, &item));
 
+	for (int i = 0; i < 20; i++)
+		printf("(%d) %p\n", i, searchKS2(&table, i, -1));
+
+	tableDelete(&table);
+	system("pause");
 	return 0;
 }

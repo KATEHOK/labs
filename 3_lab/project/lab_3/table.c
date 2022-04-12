@@ -4,7 +4,8 @@
 
 
 int tableInit(Table* pTable) {
-	int maxSize1 = 0, maxSize2 = 0, status;
+	int maxSize1 = 0, maxSize2 = 0, status, i;
+	struct KeySpace2* pTemp;
 	pTable->countKeys1 = 0;
 	pTable->countKeys2 = 0;
 	if (maxSize1 == 0) {
@@ -30,10 +31,21 @@ int tableInit(Table* pTable) {
 		free(pTable->pKS1);
 		return 1;
 	}
-	printf("maxsize1 = %d; maxsize2 = %d\n", maxSize1, maxSize2);
+	pTemp = pTable->pKS2;
+	for (i = 0; i < maxSize2; i++) {
+		pTemp->pNext = NULL;
+		pTemp->pPrev = NULL;
+		pTemp->release = -1;
+		pTemp++;
+	}
 	return 0;
 }
-void tableDelete(Table*);
+
+void tableDelete(Table* pTable) {
+	free(pTable->pKS1);
+	// TODO обход списка и удаление элементов
+	free(pTable->pKS2);
+}
 
 int tableAdd(Table*, int, int, char*);
 Item* tableSearchItemByComposite(Table*, int, int);
@@ -54,7 +66,6 @@ int setMaxSizeKS(int* pData, int KSNumber) {
 int searchKS1(Table* pTable, int key) {
 	int minId = 0, maxId = pTable->countKeys1 - 1, curId;
 	while (minId <= maxId) {
-		//printf("min = %d; max = %d\n", minId, maxId);
 		curId = (minId + maxId) / 2;
 		if (key == pTable->pKS1[curId].key)
 			return curId;
@@ -87,9 +98,7 @@ int insertKS1(Table* pTable, int key, Item* pData) {
 	i = searchKS1(pTable, key);
 	if (i > -1)
 		return 2;
-	//printf("After errors\n");
 	if (pTable->countKeys1 == 0) {
-		printf("countKeys1 == 0\n");
 		pTable->pKS1[0].key = key;
 		pTable->pKS1[0].pData = pData;
 	} else {
@@ -107,5 +116,55 @@ int insertKS1(Table* pTable, int key, Item* pData) {
 		}
 	}
 	pTable->countKeys1++;
+	return 0;
+}
+
+int getHash(int key, int size) {
+	return abs((key * 2147483647) % size);
+}
+
+struct KeySpace2** searchKS2(Table* pTable, int key, int release) {
+	struct KeySpace2** ppRes;
+	struct KeySpace2* pKS = pTable->pKS2 + getHash(key, pTable->maxSize2);
+	int counter = 0;
+	if (pKS->pNext == NULL)
+		return NULL;
+	ppRes = (struct KeySpace2**)malloc(sizeof(struct KeySpace2*) * pTable->countKeys2);
+	while (pKS->pNext) {
+		pKS = pKS->pNext;
+		if (pKS->key == key) {
+			if (release == -1) {
+				ppRes[counter] = pKS;
+				counter++;
+			} else if (pKS->release == release) {
+				*ppRes = pKS;
+				return (struct KeySpace2**)realloc(ppRes, sizeof(struct KeySpace2*));
+			}
+		}
+	}
+	if (counter > 0)
+		return (struct KeySpace2**)realloc(ppRes, counter * sizeof(struct KeySpace2*));
+	free(ppRes);
+	return NULL;
+}
+
+int insertKS2(Table* pTable, int key, Item* pData) {
+	int lastRelease, hash;
+	struct KeySpace2** ppSynonims = searchKS2(pTable, key, -1), *pNew;
+	hash = getHash(key, pTable->maxSize2);
+	if (ppSynonims == NULL)
+		lastRelease = -1;
+	else
+		lastRelease = (*ppSynonims)->release;
+	free(ppSynonims);
+	pNew = (struct KeySpace2*)malloc(sizeof(struct KeySpace2));
+	if (pNew == NULL)
+		return 1;
+	pNew->key = key;
+	pNew->release = lastRelease + 1;
+	pNew->pData = pData;
+	pNew->pNext = (pTable->pKS2 + hash)->pNext;
+	pNew->pPrev = pTable->pKS2 + hash;
+	(pTable->pKS2 + hash)->pNext = pNew;
 	return 0;
 }

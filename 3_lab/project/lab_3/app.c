@@ -5,60 +5,20 @@
 
 
 int main() {
-	int status, key;
+	int status;
 	Table table;
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	printf("Developed by KATEHOK (https://github.com/KATEHOK)\nPlease enjoy!\n\n");
 
-	printf("%d %d\n", (int)sizeof(struct KeySpace1), (int)sizeof(struct KeySpace2));
-	status = tableInit(&table);
-	printf("Init: %d\n\n", status);
+	while (1 == 1) {
+		status = tableInit(&table);
+		printf("Init: %d\n\n", status);
 
-	/*
-	Item test;
-	printf("1 - oversize; 2 - key is already exist\n");
-	status = insertKS1(&table, 34, &test);
-	printf("Insert 34: %d\n", status);
-	for (int i = 0; i < table.countKeys1; i++)
-		printf("(%d) %d\n", i, table.pKS1[i].key);
-	status = insertKS1(&table, 23, &test);
-	printf("\nInsert 23: %d\n", status);
-	for (int i = 0; i < table.countKeys1; i++)
-		printf("(%d) %d\n", i, table.pKS1[i].key);
-	status = insertKS1(&table, 23, &test);
-	printf("\nInsert 23: %d\n", status);
-	for (int i = 0; i < table.countKeys1; i++)
-		printf("(%d) %d\n", i, table.pKS1[i].key);
-	status = insertKS1(&table, 54, &test);
-	printf("\nInsert 54: %d\n", status);
-	for (int i = 0; i < table.countKeys1; i++)
-		printf("(%d) %d\n", i, table.pKS1[i].key);
-	status = insertKS1(&table, 60, &test);
-	printf("\nInsert 60: %d\n", status);
-	for (int i = 0; i < table.countKeys1; i++)
-		printf("(%d) %d\n", i, table.pKS1[i].key);
+		printf("CK2: %d\n", table.countKeys2);
 
-	printf("\n1 - key is not exist\n");
-	status = deleteKS1(&table, 34);
-	printf("Delete 34: %d\n", status);
-	status = deleteKS1(&table, 23);
-	printf("Delete 23: %d\n", status);
-	status = deleteKS1(&table, 23);
-	printf("Delete 23: %d\n", status);
-	status = deleteKS1(&table, 54);
-	printf("Delete 54: %d\n", status);
-	status = deleteKS1(&table, 60);
-	printf("Delete 60: %d\n", status);
-	*/
-	Item item;
-
-	for (int i = 0; i < 20; i++)
-		printf("<%d> h(%d) %d\n", i, getHash(i, table.maxSize2), insertKS2(&table, i, &item));
-
-	for (int i = 0; i < 20; i++)
-		printf("(%d) %p\n", i, searchKS2(&table, i, -1));
-
-	tableDelete(&table);
-	system("pause");
+		tableDelete(&table);
+		system("pause");
+		printf("\n");
+	}
 	return 0;
 }

@@ -35,6 +35,8 @@ int tableInit(Table* pTable) {
 	for (i = 0; i < maxSize2; i++) {
 		pTemp->pNext = NULL;
 		pTemp->pPrev = NULL;
+		pTemp->pData = NULL;
+		pTemp->key = i;
 		pTemp->release = -1;
 		pTemp++;
 	}
@@ -42,8 +44,23 @@ int tableInit(Table* pTable) {
 }
 
 void tableDelete(Table* pTable) {
+	int i;
+	struct KeySpace2* pKS2;
 	free(pTable->pKS1);
-	// TODO обход списка и удаление элементов
+	for (i = 0; i < pTable->maxSize2; i++) {
+		pKS2 = pTable->pKS2 + i;
+		if (pKS2->pNext != NULL) {
+			while (pKS2->pNext != NULL) {
+				pKS2 = pKS2->pNext;
+				//TODO очистка информации из pData
+				printf("%p\n", pKS2);
+				system("pause");
+				free(pKS2->pData);
+				free(pKS2->pPrev);
+			}
+			free(pKS2);
+		}
+	}
 	free(pTable->pKS2);
 }
 
@@ -123,48 +140,94 @@ int getHash(int key, int size) {
 	return abs((key * 2147483647) % size);
 }
 
-struct KeySpace2** searchKS2(Table* pTable, int key, int release) {
-	struct KeySpace2** ppRes;
-	struct KeySpace2* pKS = pTable->pKS2 + getHash(key, pTable->maxSize2);
+int searchKS2(struct KeySpace2** ppRes, Table* pTable, int key, int release) {
+	struct KeySpace2 *pKS = pTable->pKS2 + getHash(key, pTable->maxSize2);
 	int counter = 0;
 	if (pKS->pNext == NULL)
-		return NULL;
-	ppRes = (struct KeySpace2**)malloc(sizeof(struct KeySpace2*) * pTable->countKeys2);
+		return 0;
 	while (pKS->pNext) {
 		pKS = pKS->pNext;
 		if (pKS->key == key) {
-			if (release == -1) {
+			if (release == -2) {
+				*ppRes = pKS;
+				return 1;
+			} else if (release == -1) {
 				ppRes[counter] = pKS;
 				counter++;
 			} else if (pKS->release == release) {
 				*ppRes = pKS;
-				return (struct KeySpace2**)realloc(ppRes, sizeof(struct KeySpace2*));
+				return 1;
 			}
 		}
 	}
-	if (counter > 0)
-		return (struct KeySpace2**)realloc(ppRes, counter * sizeof(struct KeySpace2*));
-	free(ppRes);
-	return NULL;
+	return counter;
 }
 
 int insertKS2(Table* pTable, int key, Item* pData) {
-	int lastRelease, hash;
-	struct KeySpace2** ppSynonims = searchKS2(pTable, key, -1), *pNew;
-	hash = getHash(key, pTable->maxSize2);
-	if (ppSynonims == NULL)
+	int lastRelease, hash, status;
+	struct KeySpace2* pNew, *pLast;
+	status = searchKS2(&pLast, pTable, key, -2);
+	if (status == 0)
 		lastRelease = -1;
 	else
-		lastRelease = (*ppSynonims)->release;
-	free(ppSynonims);
+		lastRelease = pLast->release;
 	pNew = (struct KeySpace2*)malloc(sizeof(struct KeySpace2));
 	if (pNew == NULL)
 		return 1;
+	hash = getHash(key, pTable->maxSize2);
 	pNew->key = key;
 	pNew->release = lastRelease + 1;
 	pNew->pData = pData;
 	pNew->pNext = (pTable->pKS2 + hash)->pNext;
 	pNew->pPrev = pTable->pKS2 + hash;
+	if ((pTable->pKS2 + hash)->pNext != NULL)
+		(pTable->pKS2 + hash)->pNext->pPrev = pNew;
 	(pTable->pKS2 + hash)->pNext = pNew;
+	pNew->pData->id2 = hash;
+	pNew->pData->key2 = key;
+	pNew->pData->p2 = pNew;
+	pTable->countKeys2++;
+	printf("{%d} %p\n", key, pNew);
 	return 0;
+}
+
+int deleteKS2(Table* pTable, int key, int release, int doNotTouch) {
+	int len, deleted, i;
+	struct KeySpace2 *pTemp, **ppSynonims = NULL;
+	ppSynonims = (struct KeySpace2**)malloc(sizeof(struct KeySpace2*) * pTable->countKeys2);
+	if (ppSynonims == NULL)
+		return -1;
+	len = searchKS2(ppSynonims, pTable, key, release);
+	deleted = 0;
+	for (i = 0; i < len; i++) {
+		if (doNotTouch > 0)
+			doNotTouch--;
+		else {
+			/*printf("\n");
+			for (int i = 0; i < pTable->maxSize2; i++) {
+				struct KeySpace2* pKS = pTable->pKS2 + i;
+				printf("{%d} ", i);
+				while (pKS->pNext) {
+					pKS = pKS->pNext;
+					printf("(%d.%d) ", pKS->key, pKS->release);
+				}
+				printf("| ");
+				while (pKS->pPrev) {
+					pKS = pKS->pPrev;
+					printf("(%d.%d) ", pKS->key, pKS->release);
+				}
+				printf("\n");
+			}
+			printf("\n");*/
+			pTemp = ppSynonims[i];
+			ppSynonims[i]->pPrev->pNext = ppSynonims[i]->pNext;
+			if (ppSynonims[i]->pNext != NULL)
+				ppSynonims[i]->pNext->pPrev = ppSynonims[i]->pPrev;
+			free(pTemp);
+			deleted++;
+		}
+	}
+	pTable->countKeys2 -= deleted;
+	free(ppSynonims);
+	return deleted;
 }

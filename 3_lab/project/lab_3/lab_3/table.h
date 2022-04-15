@@ -5,30 +5,31 @@
 
 #define TABLE_H
 
-typedef struct {
+struct Item {
 	// указатель на информацию
 	char* pInfo;
 	// опциональные поля, для оптимизации выполнения операций,
 	// состав и наличие которых должны быть обоснованы:
-	// ключ элемента из 1­го пространства ключей
+	// ключи элемента из соответствующих пространств ключей
 	int key1;
-	// ключ элемента из 2­го пространства ключей
 	int key2;
 	// связь с элементом 1­го пространства ключей по индексу
 	int id1;
 	// связь с элементом 2­го пространства ключей по индексу (на первый элемент соответствующего списка)
 	int id2;
-	// связь с элементом 1­го пространства ключей по указателю
+	// связь с элементоми соответствующих пространств ключей по указателю
 	struct KeySpace1* p1;
-	// связь с элементом 2­го пространства ключей по указателю
 	struct KeySpace2* p2;
-} Item;
+	// для каскадности родительских и дочерних таблиц
+	struct Item* pPrev;
+	struct Item* pNext;
+};
 
 struct KeySpace1 {
 	// ключ
 	int key;
 	// указатель на элемент
-	Item* pData;
+	struct Item* pData;
 };
 
 struct KeySpace2 {
@@ -37,7 +38,7 @@ struct KeySpace2 {
 	// номер релиза
 	int release;
 	// указатель на данные
-	Item* pData;
+	struct Item* pData;
 	// указатель на следующий элемент списка
 	struct KeySpace2* pNext;
 	// указатель на предыдущий элемент списка
@@ -54,17 +55,23 @@ typedef struct {
 	// количества ключей
 	int countKeys1;
 	int countKeys2;
+	// максимальные вставленные ключи
+	int maxKey1;
+	int maxKey2;
 } Table;
 
 /*
 * Инициализирует таблицу
 * Параметры:
-* (Table*) pTable - указатель на таблицу.
+* (Table**) ppTable - указатель на указатель на таблицу;
+* (int) maxSize1 - размер 1-го пространства ключей (0 - пользовательский выбор);
+* (int) maxSize2 - размер 2-го пространства ключей (0 - пользовательский выбор).
 * Вернет:
 * 0 - успешно;
-* 1 - не успешно.
+* 1 - не успешно (конец файла);
+* 1 - не успешно (отказ в выделении памяти).
 */
-int tableInit(Table*);
+int tableInit(Table**, int, int);
 
 /*
 * Удаляет таблицу
@@ -73,10 +80,26 @@ int tableInit(Table*);
 */
 void tableDelete(Table*);
 
-int tableAdd(Table*, int, int, char*);
-Item* tableSearchItemByComposite(Table*, int, int);
+/*
+* Вставляет элемент в таблицу
+* Параметры:
+* (Table*) pTable - указатель на таблицу;
+* (int) key1 - ключ для 1-го пространства ключей;
+* (int) key2 - ключ для 2-го пространства ключей;
+* (int) isKey1True - передача 1-го ключа (0 - ключ верный, 1 - нужно подобрать новый ключ);
+* (int) isKey2True - передача 2-го ключа (0 - ключ верный, 1 - нужно подобрать новый ключ);
+* (struct Item*) pData - указатель на новые данные.
+* Вернет:
+* 0 - успешно;
+* 1 - не успешно (переполнение);
+* 2 - не успешно (дублирование ключей);
+* 3 - не успешно (отказ в запросе выделения памяти).
+*/
+int tableAdd(Table*, int, int, int, int, struct Item*);
+
+struct Item* tableSearchItemByComposite(Table*, int, int);
 void tableDeleteItemByComposite(Table*, int, int);
-Item* tableSearchItemBySingle(Table*, int);
+struct Item* tableSearchItemBySingle(Table*, int);
 void tableDeleteItemBySingle(Table*, int);
 int tablePrint(Table*);
 
@@ -118,13 +141,14 @@ int deleteKS1(Table*, int);
 * Параметры:
 * (Table*) pTable - указатель на таблицу,
 * (int) key - ключ
-* (Item*) pData - указатель на новые данные.
+* (struct Item*) pData - указатель на новые данные;
+* (int) isKeyTrue - передача ключа (0 - ключ верный, 1 - нужно подобрать новый ключ).
 * Вернет:
 * 0 - успешно;
 * 1 - не успешно (переполнение);
-* 1 - не успешно (дублирование ключей).
+* 2 - не успешно (дублирование ключей).
 */
-int insertKS1(Table*, int, Item*);
+int insertKS1(Table*, int, struct Item*, int);
 
 /*
 * Хэш-функция
@@ -154,12 +178,13 @@ int searchKS2(struct KeySpace2**, Table*, int, int);
 * Параметры:
 * (Table*) pTable - указатель на таблицу,
 * (int) key - ключ
-* (Item*) pData - указатель на новые данные.
+* (struct Item*) pData - указатель на новые данные;
+* (int) isKeyTrue - передача ключа (0 - ключ верный, 1 - нужно подобрать новый ключ).
 * Вернет:
 * 0 - успешно;
 * 1 - не успешно (отказ в запросе выделения памяти).
 */
-int insertKS2(Table*, int, Item*);
+int insertKS2(Table*, int, struct Item*, int);
 
 /*
 * Удаляет элемент из хэш-таблицы
@@ -176,3 +201,39 @@ int insertKS2(Table*, int, Item*);
 * -1 - не успешно (отказ в выделении вспомогательной памяти).
 */
 int deleteKS2(Table*, int, int, int);
+
+/*
+* Ищет элементы таблицы по диапазону ключей
+* Параметры:
+* (Table*) pTable - указатель на таблицу,
+* (int) minKey - ключ-нижняя граница диапазона;
+* (int) maxKey - ключ-верхняя граница диапазона.
+* Вернет:
+* > NULL - указатель на новую таблицу;
+* NULL - не успешно.
+*/
+Table* searchRangeKS1(Table*, int, int);
+
+/*
+* Распечатывает таблицу
+* Параметры:
+* (Table*) pTable - указатель на таблицу.
+*/
+void printByKS1(Table*);
+
+/*
+* Создает дочерний элемент (списковая логика)
+* Параметры:
+* (struct Item*) pPrev - указатель на родительский элемент.
+* Вернет:
+* > NULL - указатель на дочерний элемент;
+* NULL - не успешно.
+*/
+struct Item* makeChild(struct Item*);
+
+/*
+* Удаляет элемент из списка
+* Параметры:
+* (struct Item*) pCurrent - удаляемый элемент.
+*/
+void deleteItemFromList(struct Item*);

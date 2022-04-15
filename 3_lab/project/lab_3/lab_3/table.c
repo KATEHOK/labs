@@ -3,35 +3,44 @@
 #endif // !APP_H
 
 
-int tableInit(Table* pTable) {
-	int maxSize1 = 0, maxSize2 = 0, status, i;
+int tableInit(Table** ppTable, int maxSize1, int maxSize2) {
+	int status, i;
 	struct KeySpace2* pTemp;
-	pTable->countKeys1 = 0;
-	pTable->countKeys2 = 0;
+	*ppTable = (Table*)malloc(sizeof(Table));
+	if (*ppTable == NULL)
+		return 2;
+	(*ppTable)->countKeys1 = 0;
+	(*ppTable)->countKeys2 = 0;
+	(*ppTable)->maxKey1 = 0;
+	(*ppTable)->maxKey2 = 0;
 	if (maxSize1 == 0) {
 		status = setMaxSizeKS(&maxSize1, 1);
-		if (status == 1)
+		if (status == 1) {
+			free(*ppTable);
 			return 1;
+		}
 	}
 	if (maxSize2 == 0) {
 		status = setMaxSizeKS(&maxSize2, 2);
-		if (status == 1)
+		if (status == 1) {
+			free(*ppTable);
 			return 1;
+		}
 	}
-	pTable->maxSize1 = maxSize1;
-	pTable->maxSize2 = maxSize2;
-	pTable->pKS1 = (struct KeySpace1*)malloc(maxSize1 * sizeof(struct KeySpace1));
-	if (pTable->pKS1 == NULL) {
-		printf("|-> Memory request Error!\n");
-		return 1;
+	(*ppTable)->maxSize1 = maxSize1;
+	(*ppTable)->maxSize2 = maxSize2;
+	(*ppTable)->pKS1 = (struct KeySpace1*)malloc(maxSize1 * sizeof(struct KeySpace1));
+	if ((*ppTable)->pKS1 == NULL) {
+		free(*ppTable);
+		return 2;
 	}
-	pTable->pKS2 = (struct KeySpace2*)malloc(maxSize2 * sizeof(struct KeySpace2));
-	if (pTable->pKS2 == NULL) {
-		printf("|-> Memory request Error!\n");
-		free(pTable->pKS1);
-		return 1;
+	(*ppTable)->pKS2 = (struct KeySpace2*)malloc(maxSize2 * sizeof(struct KeySpace2));
+	if ((*ppTable)->pKS2 == NULL) {
+		free((*ppTable)->pKS1);
+		free(*ppTable);
+		return 2;
 	}
-	pTemp = pTable->pKS2;
+	pTemp = (*ppTable)->pKS2;
 	for (i = 0; i < maxSize2; i++) {
 		pTemp->pNext = NULL;
 		pTemp->pPrev = NULL;
@@ -50,24 +59,36 @@ void tableDelete(Table* pTable) {
 	for (i = 0; i < pTable->maxSize2; i++) {
 		pKS2 = pTable->pKS2 + i;
 		if (pKS2->pNext != NULL) {
-			while (pKS2->pNext != NULL) {
+			do {
 				pKS2 = pKS2->pNext;
 				//TODO очистка информации из pData
-				printf("%p\n", pKS2);
-				system("pause");
-				free(pKS2->pData);
-				free(pKS2->pPrev);
-			}
-			free(pKS2);
+				deleteItemFromList(pKS2->pData);
+				if (pKS2->pPrev != pTable->pKS2 + i)
+					free(pKS2->pPrev);
+			} while (pKS2->pNext != NULL);
+			if (pKS2 != pTable->pKS2 + i)
+				free(pKS2);
 		}
 	}
 	free(pTable->pKS2);
+	free(pTable);
 }
 
-int tableAdd(Table*, int, int, char*);
-Item* tableSearchItemByComposite(Table*, int, int);
+int tableAdd(Table* pTable, int key1, int key2, int isKey1True, int isKey2True, struct Item* pData) {
+	int status;
+	status = insertKS1(pTable, key1, pData, isKey1True);
+	if (status > 0)
+		return status;
+	status = insertKS2(pTable, key2, pData, isKey2True);
+	if (status == 1)
+		return 3;
+	return 0;
+}
+
+
+struct Item* tableSearchItemByComposite(Table*, int, int);
 void tableDeleteItemByComposite(Table*, int, int);
-Item* tableSearchItemBySingle(Table*, int);
+struct Item* tableSearchItemBySingle(Table*, int);
 void tableDeleteItemBySingle(Table*, int);
 int tablePrint(Table*);
 
@@ -106,11 +127,13 @@ int deleteKS1(Table* pTable, int key) {
 	return 0;
 }
 
-int insertKS1(Table* pTable, int key, Item* pData) {
+int insertKS1(Table* pTable, int key, struct Item* pData, int isKeyTrue) {
 	int i;
 	// переполнение
 	if (pTable->countKeys1 == pTable->maxSize1)
 		return 1;
+	if (isKeyTrue == 1)
+		key = pTable->maxKey1 + 1;
 	// дублирование ключей
 	i = searchKS1(pTable, key);
 	if (i > -1)
@@ -132,6 +155,8 @@ int insertKS1(Table* pTable, int key, Item* pData) {
 			}
 		}
 	}
+	if (pTable->countKeys1 == 0 || key > pTable->maxKey1)
+		pTable->maxKey1 = key;
 	pTable->countKeys1++;
 	return 0;
 }
@@ -163,9 +188,11 @@ int searchKS2(struct KeySpace2** ppRes, Table* pTable, int key, int release) {
 	return counter;
 }
 
-int insertKS2(Table* pTable, int key, Item* pData) {
+int insertKS2(Table* pTable, int key, struct Item* pData, int isKeyTrue) {
 	int lastRelease, hash, status;
 	struct KeySpace2* pNew, *pLast;
+	if (isKeyTrue == 1)
+		key = pTable->maxKey2 + 1;
 	status = searchKS2(&pLast, pTable, key, -2);
 	if (status == 0)
 		lastRelease = -1;
@@ -186,8 +213,9 @@ int insertKS2(Table* pTable, int key, Item* pData) {
 	pNew->pData->id2 = hash;
 	pNew->pData->key2 = key;
 	pNew->pData->p2 = pNew;
+	if (pTable->countKeys2 == 0 || key > pTable->maxKey2)
+		pTable->maxKey2 = key;
 	pTable->countKeys2++;
-	printf("{%d} %p\n", key, pNew);
 	return 0;
 }
 
@@ -203,22 +231,6 @@ int deleteKS2(Table* pTable, int key, int release, int doNotTouch) {
 		if (doNotTouch > 0)
 			doNotTouch--;
 		else {
-			/*printf("\n");
-			for (int i = 0; i < pTable->maxSize2; i++) {
-				struct KeySpace2* pKS = pTable->pKS2 + i;
-				printf("{%d} ", i);
-				while (pKS->pNext) {
-					pKS = pKS->pNext;
-					printf("(%d.%d) ", pKS->key, pKS->release);
-				}
-				printf("| ");
-				while (pKS->pPrev) {
-					pKS = pKS->pPrev;
-					printf("(%d.%d) ", pKS->key, pKS->release);
-				}
-				printf("\n");
-			}
-			printf("\n");*/
 			pTemp = ppSynonims[i];
 			ppSynonims[i]->pPrev->pNext = ppSynonims[i]->pNext;
 			if (ppSynonims[i]->pNext != NULL)
@@ -230,4 +242,69 @@ int deleteKS2(Table* pTable, int key, int release, int doNotTouch) {
 	pTable->countKeys2 -= deleted;
 	free(ppSynonims);
 	return deleted;
+}
+
+Table* searchRangeKS1(Table* pTable, int minKey, int maxKey) {
+	Table* pResTable;
+	struct Item* pChild;
+	int status, key, keyId;
+	status = tableInit(&pResTable, pTable->maxSize1, pTable->maxSize2);
+	if (status == 1) {
+		free(pResTable);
+		return NULL;
+	}
+	if (minKey > maxKey) {
+		key = minKey;
+		minKey = maxKey;
+		maxKey = key;
+	}
+	for (key = minKey; key <= maxKey; key++) {
+		keyId = searchKS1(pTable, key);
+		if (keyId == -1)
+			continue;
+		// вставка элемента
+		pChild = makeChild(pTable->pKS1[keyId].pData);
+		if (pChild == NULL) {
+			tableDelete(pResTable);
+			return NULL;
+		}
+		status = tableAdd(pResTable, key, pTable->pKS1[keyId].pData->key2, 0, 0, pChild);
+		if (status > 0) {
+			deleteItemFromList(pChild);
+			tableDelete(pResTable);
+			return NULL;
+		}
+	}
+	return pResTable;
+}
+
+void printByKS1(Table* pTable) {
+	int i;
+	printf("\n");
+	for (i = 0; i < pTable->countKeys1; i++) {
+		printf("(%2d) k1 %2d, k2 %2d, r %1d\n", i, pTable->pKS1[i].key,
+			pTable->pKS1[i].pData->key2, pTable->pKS1[i].pData->p2->release);
+	}
+	printf("\n");
+}
+
+struct Item* makeChild(struct Item* pPrev) {
+	struct Item* pChild;
+	pChild = (struct Item*)malloc(sizeof(struct Item));
+	if (pChild == NULL)
+		return NULL;
+	pChild->pPrev = pPrev;
+	pChild->pNext = NULL;
+	while (pPrev->pNext != NULL)
+		pPrev = pPrev->pNext;
+	pPrev->pNext = pChild;
+	return pChild;
+}
+
+void deleteItemFromList(struct Item* pCurrent) {
+	if (pCurrent->pPrev)
+		pCurrent->pPrev->pNext = pCurrent->pNext;
+	if (pCurrent->pNext)
+		pCurrent->pNext->pPrev = pCurrent->pPrev;
+	free(pCurrent);
 }

@@ -97,7 +97,18 @@ void tableDelete(Table*);
 */
 int tableAdd(Table*, int, int, int, int, struct Item*);
 
+/*
+* Ищет ячейку по составному ключу
+* Параметры:
+* (Table*) pTable - указатель на таблицу;
+* (int) key1 - ключ 1-го пространства ключей;
+* (int) key2 - ключ 2-го пространства ключей.
+* Вернет:
+* > NULL - указатель на ячейку;
+* NULL - не успешно.
+*/
 struct Item* tableSearchItemByComposite(Table*, int, int);
+
 void tableDeleteItemByComposite(Table*, int, int);
 struct Item* tableSearchItemBySingle(Table*, int);
 void tableDeleteItemBySingle(Table*, int);

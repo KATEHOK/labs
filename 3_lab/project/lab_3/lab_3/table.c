@@ -85,8 +85,18 @@ int tableAdd(Table* pTable, int key1, int key2, int isKey1True, int isKey2True, 
 	return 0;
 }
 
+struct Item* tableSearchItemByComposite(Table* pTable, int key1, int key2) {
+	int status, key1Id;
+	struct Item* pItem;
+	key1Id = searchKS1(pTable, key1);
+	if (key1 == -1)
+		return NULL;
+	pItem = pTable->pKS1[key1Id].pData;
+	if (key2 != pItem->key2)
+		return NULL;
+	return pItem;
+}
 
-struct Item* tableSearchItemByComposite(Table*, int, int);
 void tableDeleteItemByComposite(Table*, int, int);
 struct Item* tableSearchItemBySingle(Table*, int);
 void tableDeleteItemBySingle(Table*, int);

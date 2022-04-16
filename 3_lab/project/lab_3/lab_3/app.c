@@ -18,11 +18,7 @@ int main() {
 			return 0;
 		}
 
-		
-		struct Item* pItem1 = (struct Item*)malloc(sizeof(struct Item));
-		struct Item* pItem2 = (struct Item*)malloc(sizeof(struct Item));
-		pItem1->pNext = NULL;
-		pItem1->pPrev = NULL;
+		/*struct Item* pItem2 = (struct Item*)malloc(sizeof(struct Item));
 		pItem2->pNext = NULL;
 		pItem2->pPrev = NULL;
 		printf("add: %d\n", tableAdd(pTable, 0, 0, 1, 1, pItem1));
@@ -31,7 +27,16 @@ int main() {
 		Table* pTable2 = searchRangeKS1(pTable, 0, 1);
 		printByKS1(pTable2);
 		tableDelete(pTable2);
-		
+		*/
+
+		struct Item* pItem1 = (struct Item*)malloc(sizeof(struct Item));
+		pItem1->pNext = NULL;
+		pItem1->pPrev = NULL;
+		printf("add: %d\n", tableAdd(pTable, 89, 34, 0, 0, pItem1));
+		printByKS1(pTable);
+
+		struct Item* pItem = tableSearchItemByComposite(pTable, 89, 34);
+		printf("%d %d\n", pItem->key1, pItem->key2);
 
 		tableDelete(pTable);
 		system("pause");

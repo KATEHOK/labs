@@ -94,6 +94,7 @@ struct Item* tableSearchItemByComposite(Table* pTable, int key1, int key2) {
 	pItem = pTable->pKS1[key1Id].pData;
 	if (key2 != pItem->key2)
 		return NULL;
+	printf("%d %d\n", pItem->key1, pItem->key2);
 	return pItem;
 }
 
@@ -151,17 +152,26 @@ int insertKS1(Table* pTable, int key, struct Item* pData, int isKeyTrue) {
 	if (pTable->countKeys1 == 0) {
 		pTable->pKS1[0].key = key;
 		pTable->pKS1[0].pData = pData;
+		pData->key1 = key;
+		pData->id1 = 0;
+		pData->p1 = pTable->pKS1;
 	} else {
 		for (i = pTable->countKeys1 - 1; i >= 0; i--) {
 			if (pTable->pKS1[i].key <= key) {
 				pTable->pKS1[i + 1].key = key;
 				pTable->pKS1[i + 1].pData = pData;
+				pData->key1 = key;
+				pData->id1 = i + 1;
+				pData->p1 = pTable->pKS1 + i + 1;
 				break;
 			} else
 				pTable->pKS1[i + 1] = pTable->pKS1[i];
 			if (i == 0) {
 				pTable->pKS1->key = key;
 				pTable->pKS1->pData = pData;
+				pData->key1 = key;
+				pData->id1 = 0;
+				pData->p1 = pTable->pKS1;
 			}
 		}
 	}
@@ -292,7 +302,7 @@ void printByKS1(Table* pTable) {
 	int i;
 	printf("\n");
 	for (i = 0; i < pTable->countKeys1; i++) {
-		printf("(%2d) k1 %2d, k2 %2d, r %1d\n", i, pTable->pKS1[i].key,
+		printf("(%2d) k1 %2d, k2 %2d, r %1d\n", i, pTable->pKS1[i].pData->key1,
 			pTable->pKS1[i].pData->key2, pTable->pKS1[i].pData->p2->release);
 	}
 	printf("\n");

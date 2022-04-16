@@ -109,7 +109,21 @@ int tableAdd(Table*, int, int, int, int, struct Item*);
 */
 struct Item* tableSearchItemByComposite(Table*, int, int);
 
-void tableDeleteItemByComposite(Table*, int, int);
+/*
+* Удаляет ячейку таблицы по составному ключу
+* Параметры:
+* (Table*) pTable - указатель на таблицу;
+* (int) key1 - ключ из 1-го пространства ключей;
+* (int) key2 - ключ из 2-го пространства ключей.
+* Вернет:
+* 0 - успешно;
+* 1 - не успешно (ошибка поиска);
+* 2 - не успешно (ошибка удаления 1-го ключа);
+* 3 - не успешно (ошибка удаления 2-го ключа, ошибка возврата 1-го ключа)
+* 4 - не успешно (ошибка удаления 2-го ключа, таблица не изменена).
+*/
+int tableDeleteItemByComposite(Table*, int, int);
+
 struct Item* tableSearchItemBySingle(Table*, int);
 void tableDeleteItemBySingle(Table*, int);
 int tablePrint(Table*);
@@ -248,3 +262,13 @@ struct Item* makeChild(struct Item*);
 * (struct Item*) pCurrent - удаляемый элемент.
 */
 void deleteItemFromList(struct Item*);
+
+/*
+* Создает новую ячейку (элемент списка)
+* Параметры:
+* (char*) pInfo - указатель на информацию.
+* Вернет:
+* > NULL - указатель на ячейку;
+* NULL - не успешно.
+*/
+struct Item* makeNewItem(char*);

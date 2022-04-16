@@ -94,11 +94,28 @@ struct Item* tableSearchItemByComposite(Table* pTable, int key1, int key2) {
 	pItem = pTable->pKS1[key1Id].pData;
 	if (key2 != pItem->key2)
 		return NULL;
-	printf("%d %d\n", pItem->key1, pItem->key2);
 	return pItem;
 }
 
-void tableDeleteItemByComposite(Table*, int, int);
+int tableDeleteItemByComposite(Table* pTable, int key1, int key2) {
+	int status;
+	struct Item* pItem = tableSearchItemByComposite(pTable, key1, key2);
+	if (pItem == NULL)
+		return 1;
+	status = deleteKS1(pTable, pItem->key1);
+	if (status == 1)
+		return 2;
+	status = deleteKS2(pTable, pItem->key2, pItem->p2->release, 0);
+	if (status <= 0) {
+		status = insertKS1(pTable, pItem->key1, pItem, 0);
+		if (status > 0)
+			return 4;
+		return 3;
+	}
+	deleteItemFromList(pItem);
+	return 0;
+}
+
 struct Item* tableSearchItemBySingle(Table*, int);
 void tableDeleteItemBySingle(Table*, int);
 int tablePrint(Table*);
@@ -327,4 +344,18 @@ void deleteItemFromList(struct Item* pCurrent) {
 	if (pCurrent->pNext)
 		pCurrent->pNext->pPrev = pCurrent->pPrev;
 	free(pCurrent);
+}
+
+struct Item* makeNewItem(char* pInfo) {
+	struct Item* pItem = (struct Item*)malloc(sizeof(struct Item));
+	if (pItem == NULL)
+		return NULL;
+	pItem->id1 = -1;
+	pItem->id2 = -1;
+	pItem->p1 = NULL;
+	pItem->p2 = NULL;
+	pItem->pNext = NULL;
+	pItem->pPrev = NULL;
+	pItem->pInfo = pInfo;
+	return pItem;
 }

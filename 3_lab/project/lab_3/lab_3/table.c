@@ -55,23 +55,25 @@ int tableInit(Table** ppTable, int maxSize1, int maxSize2) {
 void tableDelete(Table* pTable) {
 	int i;
 	struct KeySpace2* pKS2;
-	free(pTable->pKS1);
-	for (i = 0; i < pTable->maxSize2; i++) {
-		pKS2 = pTable->pKS2 + i;
-		if (pKS2->pNext != NULL) {
-			do {
-				pKS2 = pKS2->pNext;
-				//TODO очистка информации из pData
-				deleteItemFromList(pKS2->pData);
-				if (pKS2->pPrev != pTable->pKS2 + i)
-					free(pKS2->pPrev);
-			} while (pKS2->pNext != NULL);
-			if (pKS2 != pTable->pKS2 + i)
-				free(pKS2);
+	if (pTable != NULL) {
+		free(pTable->pKS1);
+		for (i = 0; i < pTable->maxSize2; i++) {
+			pKS2 = pTable->pKS2 + i;
+			if (pKS2->pNext != NULL) {
+				do {
+					pKS2 = pKS2->pNext;
+					//TODO очистка информации из
+					deleteItemFromList(pKS2->pData);
+					if (pKS2->pPrev != pTable->pKS2 + i)
+						free(pKS2->pPrev);
+				} while (pKS2->pNext != NULL);
+				if (pKS2 != pTable->pKS2 + i)
+					free(pKS2);
+			}
 		}
+		free(pTable->pKS2);
+		free(pTable);
 	}
-	free(pTable->pKS2);
-	free(pTable);
 }
 
 int tableAdd(Table* pTable, int key1, int key2, int isKey1True, int isKey2True, struct Item* pData) {
@@ -92,6 +94,7 @@ struct Item* tableSearchItemByComposite(Table* pTable, int key1, int key2) {
 	if (key1 == -1)
 		return NULL;
 	pItem = pTable->pKS1[key1Id].pData;
+	printf("%p\n", pItem);
 	if (key2 != pItem->key2)
 		return NULL;
 	return pItem;
@@ -318,10 +321,15 @@ Table* searchRangeKS1(Table* pTable, int minKey, int maxKey) {
 void printByKS1(Table* pTable) {
 	int i;
 	printf("\n");
-	for (i = 0; i < pTable->countKeys1; i++) {
-		printf("(%2d) k1 %2d, k2 %2d, r %1d\n", i, pTable->pKS1[i].pData->key1,
-			pTable->pKS1[i].pData->key2, pTable->pKS1[i].pData->p2->release);
-	}
+	if (pTable != NULL) {
+		for (i = 0; i < pTable->countKeys1; i++) {
+			printf("(%2d) k1 %2d, k2 %2d, r %1d\n", i, pTable->pKS1[i].pData->key1,
+				pTable->pKS1[i].pData->key2, pTable->pKS1[i].pData->p2->release);
+		}
+		if (pTable->countKeys1 == 0)
+			printf("Table is empty!\n");	}
+	else
+		printf("Table is not exist!\n");
 	printf("\n");
 }
 
@@ -359,3 +367,31 @@ struct Item* makeNewItem(char* pInfo) {
 	pItem->pInfo = pInfo;
 	return pItem;
 }
+
+Table* searchByKeyOrRelease(Table* pTable, int key, int release) {
+	struct KeySpace2** ppCells;
+	Table* pNewTable;
+	int status, count, i = 0;
+	status = tableInit(&pNewTable, pTable->maxSize1, pTable->maxSize2);
+	if (status > 0)
+		return NULL;
+	ppCells = (struct KeySpace2**)malloc(pTable->countKeys2 * sizeof(struct KeySpace2*));
+	if (ppCells == NULL) {
+		tableDelete(pNewTable);
+		return NULL;
+	}
+	count = searchKS2(ppCells, pTable, key, release);
+	for (i = 0; i < count; i++) {
+		status = tableAdd(pNewTable, ppCells[i]->pData->key1,
+			ppCells[i]->key, 0, 0, makeChild(ppCells[i]->pData));
+		if (status > 0) {
+			tableDelete(pNewTable);
+			free(ppCells);
+			return NULL;
+		}
+	}
+	free(ppCells);
+	return pNewTable;
+}
+
+int tableClean(Table* pTable, int release) {}

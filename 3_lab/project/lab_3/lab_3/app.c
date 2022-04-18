@@ -18,33 +18,13 @@ int main() {
 			return 0;
 		}
 
-		/*struct Item* pItem2 = (struct Item*)malloc(sizeof(struct Item));
-		pItem2->pNext = NULL;
-		pItem2->pPrev = NULL;
-		printf("add: %d\n", tableAdd(pTable, 0, 0, 1, 1, pItem1));
-		printf("add: %d\n", tableAdd(pTable, 0, 0, 1, 1, pItem2));
+		printf("add: %d\n", tableAdd(pTable, 87, 67, 0, 0, makeNewItem(NULL)));
+		printf("add: %d\n", tableAdd(pTable, 56, 67, 0, 0, makeNewItem(NULL)));
 		printByKS1(pTable);
-		Table* pTable2 = searchRangeKS1(pTable, 0, 1);
-		printByKS1(pTable2);
-		tableDelete(pTable2);
-		*/
-		/*
-		struct Item* pItem1 = (struct Item*)malloc(sizeof(struct Item));
-		pItem1->pNext = NULL;
-		pItem1->pPrev = NULL;
-		printf("add: %d\n", tableAdd(pTable, 89, 34, 0, 0, pItem1));
-		printByKS1(pTable);
-
-		struct Item* pItem = tableSearchItemByComposite(pTable, 89, 34);
-		printf("%d %d\n", pItem->key1, pItem->key2);
-		*/
-
-		printf("add 1: %d\n", tableAdd(pTable, 98, 45, 0, 0, makeNewItem(NULL)));
-		printf("add 2: %d\n", tableAdd(pTable, 58, 49, 0, 0, makeNewItem(NULL)));
-		printByKS1(pTable);
-		status = tableDeleteItemByComposite(pTable, 58, 49);
-		printf("del: %d\n", status);
-		printByKS1(pTable);
+		Table* pCopied;
+		pCopied = searchByKeyOrRelease(pTable, 67, 1);
+		printByKS1(pCopied);
+		tableDelete(pCopied);
 
 
 		tableDelete(pTable);

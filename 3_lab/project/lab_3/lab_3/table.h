@@ -69,7 +69,7 @@ typedef struct {
 * Вернет:
 * 0 - успешно;
 * 1 - не успешно (конец файла);
-* 1 - не успешно (отказ в выделении памяти).
+* 2 - не успешно (отказ в выделении памяти).
 */
 int tableInit(Table**, int, int);
 
@@ -124,8 +124,8 @@ struct Item* tableSearchItemByComposite(Table*, int, int);
 */
 int tableDeleteItemByComposite(Table*, int, int);
 
-struct Item* tableSearchItemBySingle(Table*, int);
-void tableDeleteItemBySingle(Table*, int);
+struct Item* tableSearchItemBySingle(Table*, int, int);
+void tableDeleteItemBySingle(Table*, int, int);
 int tablePrint(Table*);
 
 /*
@@ -272,3 +272,14 @@ void deleteItemFromList(struct Item*);
 * NULL - не успешно.
 */
 struct Item* makeNewItem(char*);
+
+/*
+* Ищет ячейки по ключу из 2-го пространства ключей (все версии или указанную)
+* (Table*) pTable - указатель на таблицу;
+* (int) key - ключ из 2-го пространства ключей;
+* (int) release - искомая версия (если -1 - все, -2 - последняя).
+* Вернет:
+* > NULL - указатель на новую таблицу;
+* NULL - не успешно.
+*/
+Table* searchByKeyOrRelease(Table*, int, int);

@@ -108,7 +108,7 @@ int tableDeleteItemByComposite(Table* pTable, int key1, int key2) {
 	status = deleteKS1(pTable, pItem->key1);
 	if (status == 1)
 		return 2;
-	status = deleteKS2(pTable, pItem->key2, pItem->p2->release, 0);
+	status = deleteKS2(pTable, pItem->key2, pItem->p2->release, 0, 1);
 	if (status <= 0) {
 		status = insertKS1(pTable, pItem->key1, pItem, 0);
 		if (status > 0)
@@ -119,7 +119,29 @@ int tableDeleteItemByComposite(Table* pTable, int key1, int key2) {
 	return 0;
 }
 
-struct Item* tableSearchItemBySingle(Table*, int);
+Table* tableSearchItemBySingle(Table* pTable, int key, int ks) {
+	Table* pNewTable;
+	int id, status;
+	if (ks != 1 && ks != 2)
+		return NULL;
+	if (ks == 1) {
+		id = searchKS1(pTable, key);
+		if (id >= 0) {
+			status = tableInit(&pNewTable, 1, pTable->maxSize2);
+			if (status == 0) {
+				status = tableAdd(pNewTable, key, pTable->pKS1[id].pData->key2,
+					0, 0, makeChild(pTable->pKS1[id].pData));
+				if (status == 0)
+					return pNewTable;
+			} else
+				return NULL;
+			tableDelete(pNewTable);
+		}
+		return NULL;
+	} else
+		return searchByKeyOrRelease(pTable, key, -1);
+}
+
 void tableDeleteItemBySingle(Table*, int);
 int tablePrint(Table*);
 
@@ -259,8 +281,8 @@ int insertKS2(Table* pTable, int key, struct Item* pData, int isKeyTrue) {
 	return 0;
 }
 
-int deleteKS2(Table* pTable, int key, int release, int doNotTouch) {
-	int len, deleted, i;
+int deleteKS2(Table* pTable, int key, int release, int doNotTouch, int deleteks1) {
+	int len, deleted, i, status;
 	struct KeySpace2 *pTemp, **ppSynonims = NULL;
 	ppSynonims = (struct KeySpace2**)malloc(sizeof(struct KeySpace2*) * pTable->countKeys2);
 	if (ppSynonims == NULL)
@@ -272,6 +294,14 @@ int deleteKS2(Table* pTable, int key, int release, int doNotTouch) {
 			doNotTouch--;
 		else {
 			pTemp = ppSynonims[i];
+			if (deleteks1 == 0) {
+				status = deleteKS1(pTable, pTemp->pData->key1);
+				if (status == 1) {
+					free(ppSynonims);
+					return -2;
+				}			
+				deleteItemFromList(pTemp->pData);
+			}
 			ppSynonims[i]->pPrev->pNext = ppSynonims[i]->pNext;
 			if (ppSynonims[i]->pNext != NULL)
 				ppSynonims[i]->pNext->pPrev = ppSynonims[i]->pPrev;
@@ -320,10 +350,10 @@ Table* searchRangeKS1(Table* pTable, int minKey, int maxKey) {
 
 void printByKS1(Table* pTable) {
 	int i;
-	printf("\n");
+	printf("\nid1 key1 key2  r\n");
 	if (pTable != NULL) {
 		for (i = 0; i < pTable->countKeys1; i++) {
-			printf("(%2d) k1 %2d, k2 %2d, r %1d\n", i, pTable->pKS1[i].pData->key1,
+			printf("%3d %4d %4d %2d\n", i, pTable->pKS1[i].pData->key1,
 				pTable->pKS1[i].pData->key2, pTable->pKS1[i].pData->p2->release);
 		}
 		if (pTable->countKeys1 == 0)
@@ -394,4 +424,59 @@ Table* searchByKeyOrRelease(Table* pTable, int key, int release) {
 	return pNewTable;
 }
 
-int tableClean(Table* pTable, int release) {}
+int tableClean(Table* pTable, int doNotTouch) {
+	int hash, *pKeys, i = 0, tmp, status;
+	struct KeySpace2* pCur;
+	pKeys = (int*)malloc(sizeof(int) * pTable->countKeys2);
+	if (pKeys == NULL)
+		return 1;
+	if (doNotTouch == -1)
+		doNotTouch = 2;
+	for (hash = 0; hash < pTable->maxSize2; hash++) {
+		pCur = pTable->pKS2 + hash;
+		if (pCur->pNext == NULL)
+			continue;
+		do {
+			pCur = pCur->pNext;
+			for (tmp = 0; tmp < i; tmp++) {
+				if (pKeys[tmp] == pCur->key)
+					tmp = i + 1;
+			}
+			if (tmp == i + 1)
+				continue;
+			printf("pCur: %p\n", pCur);
+			pKeys[i] = pCur->key;
+			status = deleteKS2(pTable, pCur->key, -1, doNotTouch, 0);
+			if (status < 0) {
+				free(pKeys);
+				return 2;
+			}
+		} while (pCur->pNext != NULL);
+	}
+	free(pKeys);
+	return 0;
+}
+
+void printByKS2(Table* pTable) {
+	int i;
+	struct KeySpace2* pCounter;
+	printf("\n");
+	if (pTable != NULL) {
+		for (i = 0; i < pTable->maxSize2; i++) {
+			printf("\n%3d | ", i);
+			pCounter = pTable->pKS2 + i;
+			if (pCounter->pNext == NULL)
+				continue;
+			do {
+				pCounter = pCounter->pNext;
+				printf("%4d %4d %2d | ", pCounter->pData->key1,
+					pCounter->pData->key2, pCounter->release);
+			} while (pCounter->pNext != NULL);
+		}
+		if (pTable->countKeys2 == 0)
+			printf("Table is empty!\n");
+	}
+	else
+		printf("Table is not exist!\n");
+	printf("\n");
+}

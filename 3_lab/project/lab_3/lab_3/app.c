@@ -18,14 +18,28 @@ int main() {
 			return 0;
 		}
 
+		printf("add: %d\n", tableAdd(pTable, 517, 32, 0, 0, makeNewItem(NULL)));
+		printf("add: %d\n", tableAdd(pTable, 557, 32, 0, 0, makeNewItem(NULL)));
+		printf("add: %d\n", tableAdd(pTable, 507, 32, 0, 0, makeNewItem(NULL)));
+		printf("add: %d\n", tableAdd(pTable, 57, 32, 0, 0, makeNewItem(NULL)));
 		printf("add: %d\n", tableAdd(pTable, 87, 67, 0, 0, makeNewItem(NULL)));
+		printf("add: %d\n", tableAdd(pTable, 5656, 67, 0, 0, makeNewItem(NULL)));
+		printf("add: %d\n", tableAdd(pTable, 2, 67, 0, 0, makeNewItem(NULL)));
+		printf("add: %d\n", tableAdd(pTable, 8, 67, 0, 0, makeNewItem(NULL)));
+		printf("add: %d\n", tableAdd(pTable, 32, 67, 0, 0, makeNewItem(NULL)));
 		printf("add: %d\n", tableAdd(pTable, 56, 67, 0, 0, makeNewItem(NULL)));
+		printByKS2(pTable);
 		printByKS1(pTable);
-		Table* pCopied;
-		pCopied = searchByKeyOrRelease(pTable, 67, 1);
-		printByKS1(pCopied);
-		tableDelete(pCopied);
-
+		Table* pSearched1 = tableSearchItemBySingle(pTable, 87, 1);
+		Table* pSearched2 = tableSearchItemBySingle(pTable, 67, 2);
+		Table* pSearched3 = tableSearchItemBySingle(pTable, 0, 1);
+		printf("tables\n");
+		printByKS2(pSearched1);
+		printByKS2(pSearched2);
+		printByKS2(pSearched3);
+		tableDelete(pSearched1);
+		tableDelete(pSearched2);
+		tableDelete(pSearched3);
 
 		tableDelete(pTable);
 		system("pause");

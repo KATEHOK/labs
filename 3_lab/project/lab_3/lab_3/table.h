@@ -124,7 +124,18 @@ struct Item* tableSearchItemByComposite(Table*, int, int);
 */
 int tableDeleteItemByComposite(Table*, int, int);
 
-struct Item* tableSearchItemBySingle(Table*, int, int);
+/*
+* Ищет элементы по одному из ключей
+* Параметры:
+* (Table*) pTable - указатель на таблицу;
+* (int) key - ключ;
+* (int) ks - номер пространства ключей (1 или 2).
+* Вернет:
+* > NULL - указатель на новую таблицу;
+* NUll - не успешно.
+*/
+Table* tableSearchItemBySingle(Table*, int, int);
+
 void tableDeleteItemBySingle(Table*, int, int);
 int tablePrint(Table*);
 
@@ -225,7 +236,7 @@ int insertKS2(Table*, int, struct Item*, int);
 * >= 0 - количество удаленных элементов;
 * -1 - не успешно (отказ в выделении вспомогательной памяти).
 */
-int deleteKS2(Table*, int, int, int);
+int deleteKS2(Table*, int, int, int, int);
 
 /*
 * Ищет элементы таблицы по диапазону ключей
@@ -283,3 +294,22 @@ struct Item* makeNewItem(char*);
 * NULL - не успешно.
 */
 Table* searchByKeyOrRelease(Table*, int, int);
+
+/*
+* Удаляет ранние релизы
+* Параметры:
+* (Table*) pTable - указатель на таблицу;
+* (int) doNotTouch - сколько редизов оставить (если -2, берется значение по умолчанию).
+* Вернет:
+* 0 - успешно;
+* 1 - не успешно (ошибка выделения вспомогательной памяти);
+* 2 - не успешно (критическая поломка таблицы).
+*/
+int tableClean(Table*, int);
+
+/*
+* Распечатывает таблицу
+* Параметры:
+* (Table*) pTable - указатель на таблицу.
+*/
+void printByKS2(Table*);

@@ -18,6 +18,7 @@ int main() {
 			return 0;
 		}
 
+		/*
 		printf("add: %d\n", tableAdd(pTable, 517, 32, 0, 0, makeNewItem(NULL)));
 		printf("add: %d\n", tableAdd(pTable, 557, 32, 0, 0, makeNewItem(NULL)));
 		printf("add: %d\n", tableAdd(pTable, 507, 32, 0, 0, makeNewItem(NULL)));
@@ -39,7 +40,7 @@ int main() {
 		printByKS2(pSearched3);
 		tableDelete(pSearched1);
 		tableDelete(pSearched2);
-		tableDelete(pSearched3);
+		tableDelete(pSearched3);*/
 
 		tableDelete(pTable);
 		system("pause");

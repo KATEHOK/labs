@@ -129,12 +129,13 @@ int tableDeleteItemByComposite(Table*, int, int);
 * Параметры:
 * (Table*) pTable - указатель на таблицу;
 * (int) key - ключ;
-* (int) ks - номер пространства ключей (1 или 2).
+* (int) ks - номер пространства ключей (1 или 2);
+* (int*) pCount - указатель, куда записать длину массива.
 * Вернет:
-* > NULL - указатель на новую таблицу;
+* > NULL - указатель на массив элементов;
 * NUll - не успешно.
 */
-Table* tableSearchItemBySingle(Table*, int, int);
+struct Item** tableSearchItemBySingle(Table*, int, int, int*);
 
 void tableDeleteItemBySingle(Table*, int, int);
 int tablePrint(Table*);

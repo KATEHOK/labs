@@ -119,27 +119,38 @@ int tableDeleteItemByComposite(Table* pTable, int key1, int key2) {
 	return 0;
 }
 
-Table* tableSearchItemBySingle(Table* pTable, int key, int ks) {
-	Table* pNewTable;
-	int id, status;
+struct Item** tableSearchItemBySingle(Table* pTable, int key, int ks, int* pCount) {
+	struct KeySpace2** ppItems;
+	struct Item** ppRes;
+	int id;
+	*pCount = 0;
 	if (ks != 1 && ks != 2)
 		return NULL;
 	if (ks == 1) {
 		id = searchKS1(pTable, key);
 		if (id >= 0) {
-			status = tableInit(&pNewTable, 1, pTable->maxSize2);
-			if (status == 0) {
-				status = tableAdd(pNewTable, key, pTable->pKS1[id].pData->key2,
-					0, 0, makeChild(pTable->pKS1[id].pData));
-				if (status == 0)
-					return pNewTable;
-			} else
-				return NULL;
-			tableDelete(pNewTable);
+			ppRes = (struct Item**)malloc(sizeof(struct Item*));
+			*ppRes = pTable->pKS1[id].pData;
+			*pCount = 1;
+		} else
+			return NULL;
+	} else {
+		ppItems = (struct KeySpace2**)malloc(sizeof(struct KeySpace2*) * pTable->countKeys2);
+		*pCount = searchKS2(ppItems, pTable, key, -1);
+		if (*pCount == 0) {
+			free(ppItems);
+			return NULL;
 		}
-		return NULL;
-	} else
-		return searchByKeyOrRelease(pTable, key, -1);
+		ppRes = (struct Item**)malloc(sizeof(struct Item*) * (*pCount));
+		if (ppRes == NULL) {
+			free(ppItems);
+			return NULL;
+		}
+		for (id = 0; id < *pCount; id++)
+			ppRes[id] = ppItems[id]->pData;
+		free(ppItems);
+	}
+	return ppRes;
 }
 
 void tableDeleteItemBySingle(Table*, int);

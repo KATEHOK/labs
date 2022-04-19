@@ -119,37 +119,39 @@ int tableDeleteItemByComposite(Table* pTable, int key1, int key2) {
 	return 0;
 }
 
-struct Item** tableSearchItemBySingle(Table* pTable, int key, int ks, int* pCount) {
+struct Item** tableSearchItemBySingle(Table* pTable, int key, int* pCount) {
 	struct KeySpace2** ppItems;
 	struct Item** ppRes;
-	int id;
-	*pCount = 0;
-	if (ks != 1 && ks != 2)
-		return NULL;
-	if (ks == 1) {
-		id = searchKS1(pTable, key);
-		if (id >= 0) {
-			ppRes = (struct Item**)malloc(sizeof(struct Item*));
-			*ppRes = pTable->pKS1[id].pData;
-			*pCount = 1;
-		} else
-			return NULL;
-	} else {
-		ppItems = (struct KeySpace2**)malloc(sizeof(struct KeySpace2*) * pTable->countKeys2);
-		*pCount = searchKS2(ppItems, pTable, key, -1);
-		if (*pCount == 0) {
-			free(ppItems);
-			return NULL;
-		}
-		ppRes = (struct Item**)malloc(sizeof(struct Item*) * (*pCount));
-		if (ppRes == NULL) {
-			free(ppItems);
-			return NULL;
-		}
-		for (id = 0; id < *pCount; id++)
-			ppRes[id] = ppItems[id]->pData;
+	int id, counter, i = 0;
+	id = searchKS1(pTable, key);
+	if (id >= 0)
+		*pCount = 1;
+	ppItems = (struct KeySpace2**)malloc(sizeof(struct KeySpace2*) * pTable->countKeys2);
+	*pCount += searchKS2(ppItems, pTable, key, -1);
+	if (*pCount <= 0) {
 		free(ppItems);
+		return NULL;
 	}
+	ppRes = (struct Item**)malloc(sizeof(struct Item*) * *pCount);
+	if (ppRes == NULL) {
+		*pCount = 0;
+		free(ppItems);
+		return NULL;
+	}
+	if (id > 0) {
+		*ppRes = pTable->pKS1[id].pData;
+		if (*pCount == 1) {
+			free(ppItems);
+			return ppRes;
+		}
+		i = 1;
+	}
+	for (counter = i; counter < *pCount; counter++) {
+		if (i == 1 && ppRes[0] == ppItems[counter - i]->pData)
+			continue;
+		ppRes[counter] = ppItems[counter - i]->pData;
+	}
+	free(ppItems);
 	return ppRes;
 }
 
@@ -239,8 +241,10 @@ int getHash(int key, int size) {
 }
 
 int searchKS2(struct KeySpace2** ppRes, Table* pTable, int key, int release) {
-	struct KeySpace2 *pKS = pTable->pKS2 + getHash(key, pTable->maxSize2);
 	int counter = 0;
+	struct KeySpace2 *pKS = pTable->pKS2 + getHash(key, pTable->maxSize2);
+	if (ppRes == NULL)
+		return -1;
 	if (pKS->pNext == NULL)
 		return 0;
 	while (pKS->pNext) {

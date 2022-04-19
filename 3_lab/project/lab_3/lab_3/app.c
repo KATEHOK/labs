@@ -31,17 +31,17 @@ int main() {
 		printByKS2(pTable);
 		printByKS1(pTable);
 		
-		/*int count = 0;
-		struct Item** ppItems = tableSearchItemBySingle(pTable, 67, 2, &count);
+		int count = 0;
+		struct Item** ppItems = tableSearchItemBySingle(pTable, 67, &count);
 		for (int i = 0; i < count; i++)
 			printf("%4d %4d\n", ppItems[i]->key1, ppItems[i]->key2);
 		printf("\n");
 		free(ppItems);
 		count = 0;
-		ppItems = tableSearchItemBySingle(pTable, 32, 1, &count);
+		ppItems = tableSearchItemBySingle(pTable, 32, &count);
 		for (int i = 0; i < count; i++)
 			printf("%4d %4d\n", ppItems[i]->key1, ppItems[i]->key2);
-		free(ppItems);*/
+		free(ppItems);
 
 		tableDelete(pTable);
 		system("pause");

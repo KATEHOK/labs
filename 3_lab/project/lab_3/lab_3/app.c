@@ -10,29 +10,27 @@ int main() {
 	printf("Developed by KATEHOK (https://github.com/KATEHOK)\nPlease enjoy!\n\n");
 
 	while (1 == 1) {
-		Table* pTable;
-		status = tableInit(&pTable, 0, 0);
-		printf("Init: %d\n", status);
-		if (status > 0) {
-			system("pause");
-			return 0;
+		TablesList* pTL = tablesListInit();
+
+		/*Table* pTable = createTable(16, 4);
+		status = tablesListAddItem(pTL, pTable);
+		pTable = createTable(16, 4);
+		status = tablesListAddItem(pTL, pTable);
+		pTable = createTable(16, 4);
+		status = tablesListAddItem(pTL, pTable);
+		pTable = createTable(16, 4);
+		status = tablesListAddItem(pTL, pTable);
+		struct TablesItem* pItem = pTL->pTop;
+		//printf("pItem: %p\n", pItem);
+		while (pItem != NULL) {
+			tablePrint(pItem->pTable, 1);
+			//printf("pTable: %p ? ", pItem->pTable);
+			//printf("pTable: %p\n", (tablesListSearchItem(pTL, pItem->pTable))->pTable);
+			pItem = pItem->pNext;
 		}
+		printf("Del: %d\n", tablesListDelete(pTL));*/
 
-		printf("add: %d\n", tableAdd(pTable, 517, 32, 0, 0, makeNewItem(NULL)));
-		printf("add: %d\n", tableAdd(pTable, 557, 32, 0, 0, makeNewItem(NULL)));
-		printf("add: %d\n", tableAdd(pTable, 507, 32, 0, 0, makeNewItem(NULL)));
-		printf("add: %d\n", tableAdd(pTable, 57, 32, 0, 0, makeNewItem(NULL)));
-		printf("add: %d\n", tableAdd(pTable, 87, 67, 0, 0, makeNewItem(NULL)));
-		printf("add: %d\n", tableAdd(pTable, 5656, 67, 0, 0, makeNewItem(NULL)));
-		printf("add: %d\n", tableAdd(pTable, 2, 67, 0, 0, makeNewItem(NULL)));
-		printf("add: %d\n", tableAdd(pTable, 8, 67, 0, 0, makeNewItem(NULL)));
-		printf("add: %d\n", tableAdd(pTable, 32, 67, 0, 0, makeNewItem(NULL)));
-		printf("add: %d\n", tableAdd(pTable, 56, 67, 0, 0, makeNewItem(NULL)));
-		tablePrint(pTable, 1);
-		tablePrint(pTable, 2);
-		tablePrint(pTable, 3);
-
-		tableDelete(pTable);
+		status = tablesListDelete(pTL);
 		system("pause");
 		printf("\n");
 	}

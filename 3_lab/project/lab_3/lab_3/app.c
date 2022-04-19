@@ -28,11 +28,9 @@ int main() {
 		printf("add: %d\n", tableAdd(pTable, 8, 67, 0, 0, makeNewItem(NULL)));
 		printf("add: %d\n", tableAdd(pTable, 32, 67, 0, 0, makeNewItem(NULL)));
 		printf("add: %d\n", tableAdd(pTable, 56, 67, 0, 0, makeNewItem(NULL)));
-		printByKS2(pTable);
-		printByKS1(pTable);
-		printf("Del: %d\n", tableDeleteItemBySingle(pTable, 32, 1));
-		printByKS2(pTable);
-		printByKS1(pTable);
+		tablePrint(pTable, 1);
+		tablePrint(pTable, 2);
+		tablePrint(pTable, 3);
 
 		tableDelete(pTable);
 		system("pause");

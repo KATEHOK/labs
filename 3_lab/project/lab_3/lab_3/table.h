@@ -151,7 +151,13 @@ struct Item** tableSearchItemBySingle(Table*, int, int*);
 */
 int tableDeleteItemBySingle(Table*, int, int);
 
-int tablePrint(Table*);
+/*
+* Вызывает печать таблицы
+* Параметры:
+* (Table*) pTable - указатель на таблицу;
+* (int) ks - номер пространства ключей (1, 2 - номера; 3 - оба);
+*/
+void tablePrint(Table*, int);
 
 /*
 * Устанавливает максимальную длину таблицы (пространства ключей)

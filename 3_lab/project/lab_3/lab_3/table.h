@@ -136,7 +136,21 @@ int tableDeleteItemByComposite(Table*, int, int);
 */
 struct Item** tableSearchItemBySingle(Table*, int, int*);
 
-void tableDeleteItemBySingle(Table*, int, int);
+/*
+* Удаляет ячейку по одиному из ключей
+* Параметры:
+* (Table*) pTable - указатель на таблицу;
+* (int) key - ключ;
+* (int) ks - номер пространства ключей (1 или 2).
+* Вернет:
+* 0 - успено;
+* 1 - не успешно (неправильное значение ks);
+* 2 - не успешно (ячейка не найдена);
+* 3 - не успешно (ячейка существует, таблица сломана);
+* 4 - не успешно (ячейка существует, таблица исправна).
+*/
+int tableDeleteItemBySingle(Table*, int, int);
+
 int tablePrint(Table*);
 
 /*

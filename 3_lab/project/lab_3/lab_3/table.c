@@ -155,7 +155,41 @@ struct Item** tableSearchItemBySingle(Table* pTable, int key, int* pCount) {
 	return ppRes;
 }
 
-void tableDeleteItemBySingle(Table*, int);
+int tableDeleteItemBySingle(Table* pTable, int key, int ks) {
+	int id, status, count, i;
+	struct KeySpace2** ppItems;
+	if (ks != 1 && ks != 2)
+		return 1;
+	if (ks == 1) {
+		id = searchKS1(pTable, key);
+		if (id < 0)
+			return 2;
+		status = tableDeleteItemByComposite(pTable, key, pTable->pKS1[id].pData->key2);
+		if (status == 3)
+			return 3;
+		if (status > 1)
+			return 4;
+		if (status == 1)
+			return 2;
+	} else {
+		ppItems = (struct KeySpace2**)malloc(sizeof(struct KeySpace2*) * pTable->countKeys2);
+		count = searchKS2(ppItems, pTable, key, -1);
+		if (count == 0)
+			return 2;
+		if (count == -1)
+			return 4;
+		for (i = 0; i < count; i++) {
+			status = tableDeleteItemByComposite(pTable, ppItems[i]->pData->key1, key);
+			if (status > 1) {
+				free(ppItems);
+				return 3;
+			}
+		}
+		free(ppItems);
+	}
+	return 0;
+}
+
 int tablePrint(Table*);
 
 int setMaxSizeKS(int* pData, int KSNumber) {

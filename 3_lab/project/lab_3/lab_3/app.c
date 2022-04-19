@@ -30,18 +30,9 @@ int main() {
 		printf("add: %d\n", tableAdd(pTable, 56, 67, 0, 0, makeNewItem(NULL)));
 		printByKS2(pTable);
 		printByKS1(pTable);
-		
-		int count = 0;
-		struct Item** ppItems = tableSearchItemBySingle(pTable, 67, &count);
-		for (int i = 0; i < count; i++)
-			printf("%4d %4d\n", ppItems[i]->key1, ppItems[i]->key2);
-		printf("\n");
-		free(ppItems);
-		count = 0;
-		ppItems = tableSearchItemBySingle(pTable, 32, &count);
-		for (int i = 0; i < count; i++)
-			printf("%4d %4d\n", ppItems[i]->key1, ppItems[i]->key2);
-		free(ppItems);
+		printf("Del: %d\n", tableDeleteItemBySingle(pTable, 32, 1));
+		printByKS2(pTable);
+		printByKS1(pTable);
 
 		tableDelete(pTable);
 		system("pause");

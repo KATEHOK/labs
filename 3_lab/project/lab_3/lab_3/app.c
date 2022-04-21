@@ -12,7 +12,7 @@ int main() {
 	while (1 == 1) {
 		TablesList* pTL = tablesListInit();
 
-		/*Table* pTable = createTable(16, 4);
+		Table* pTable = createTable(16, 4);
 		status = tablesListAddItem(pTL, pTable);
 		pTable = createTable(16, 4);
 		status = tablesListAddItem(pTL, pTable);
@@ -21,10 +21,7 @@ int main() {
 		pTable = createTable(16, 4);
 		status = tablesListAddItem(pTL, pTable);
 		struct TablesItem* pItem = pTL->pTop;
-		while (pItem != NULL) {
-			tablePrint(pItem->pTable, 1);
-			pItem = pItem->pNext;
-		}*/
+		tablesListPrint(pTL);
 
 		status = tablesListDelete(pTL);
 		system("pause");

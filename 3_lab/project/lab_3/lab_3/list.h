@@ -9,6 +9,7 @@ struct TablesItem {
 	struct TablesItem* pPrev;
 	struct TablesItem* pNext;
 	Table* pTable;
+	int id;
 };
 
 typedef struct {
@@ -35,16 +36,16 @@ TablesList* tablesListInit();
 Table* createTable(int, int);
 
 /*
-* Ищет элемент списка таблиц
+* Ищет элемент списка таблиц по id или по указателю на таблицу
 * Параметры:
 * (TablesList*) pTablesList - указатель на список;
-* (Table*) pTable - указатель на искомую таблицу.
+* (Table*) pTable - указатель на искомую таблицу (!= NULL);
+* (int) id - идентификатор элемента списка (>= 0).
 * Вернет (struct TablesItem*):
 * > NULL - успешно;
 * NULL - не успешно.
-*
 */
-struct TablesItem* tablesListSearchItem(TablesList*, Table*);
+struct TablesItem* tablesListSearchItem(TablesList*, Table*, int);
 
 /*
 * Добавляет новый элемент в список таблиц
@@ -63,12 +64,13 @@ int tablesListAddItem(TablesList*, Table*);
 * Удаляет элемент из списка таблиц
 * Параметры:
 * (TablesList*) pTablesList - указатель на список таблиц;
-* (Table*) pTable - указатель на удаляемую таблицу.
+* (Table*) pTable - указатель на удаляемую таблицу (!= NULL);
+* (int) - id элемента (>= 0).
 * Вернет (int):
 * 0 - успешно;
 * 1 - не успешно (таблица не найдена).
 */
-int tablesListDeleteItem(TablesList*, Table*);
+int tablesListDeleteItem(TablesList*, Table*, int);
 
 /*
 * Удаляет список таблиц
@@ -79,3 +81,5 @@ int tablesListDeleteItem(TablesList*, Table*);
 * 1 - не успешно (неудача частного удаления; нарушение структуры списка).
 */
 int tablesListDelete(TablesList*);
+
+void tablesListPrint(TablesList*);

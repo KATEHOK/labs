@@ -21,14 +21,10 @@ int main() {
 		pTable = createTable(16, 4);
 		status = tablesListAddItem(pTL, pTable);
 		struct TablesItem* pItem = pTL->pTop;
-		//printf("pItem: %p\n", pItem);
 		while (pItem != NULL) {
 			tablePrint(pItem->pTable, 1);
-			//printf("pTable: %p ? ", pItem->pTable);
-			//printf("pTable: %p\n", (tablesListSearchItem(pTL, pItem->pTable))->pTable);
 			pItem = pItem->pNext;
-		}
-		printf("Del: %d\n", tablesListDelete(pTL));*/
+		}*/
 
 		status = tablesListDelete(pTL);
 		system("pause");

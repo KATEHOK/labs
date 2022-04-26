@@ -72,6 +72,8 @@ int tablesListDeleteItem(TablesList* pTablesList, Table* pTable, int id) {
 
 int tablesListDelete(TablesList* pTablesList) {
 	int status;
+	if (pTablesList == NULL)
+		return 0;
 	while (pTablesList->pTop != NULL) {
 		status = tablesListDeleteItem(pTablesList, pTablesList->pTop->pTable, -1);
 		if (status > 0)
@@ -83,10 +85,11 @@ int tablesListDelete(TablesList* pTablesList) {
 
 void tablesListPrint(TablesList* pTablesList) {
 	struct TablesItem* pItem = pTablesList->pTop;
-	printf("\nTables:\n");
+	printf("Tables:\n");
+	if (pItem == NULL)
+		printf("List of tables is free!\n");
 	while (pItem != NULL) {
 		printf("#%d\n", pItem->id);
 		pItem = pItem->pNext;
 	}
-	printf("\n");
 }

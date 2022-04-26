@@ -82,4 +82,9 @@ int tablesListDeleteItem(TablesList*, Table*, int);
 */
 int tablesListDelete(TablesList*);
 
+/*
+* Печатает построчно индексы элементов списка таблиц
+* Параметры:
+* (TablesList*) pTablesList - указатель на список таблиц.
+*/
 void tablesListPrint(TablesList*);

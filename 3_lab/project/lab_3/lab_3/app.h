@@ -9,3 +9,4 @@
 #include "table.h"
 #include "funcs.h"
 #include "list.h"
+#include "console.h"

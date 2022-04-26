@@ -9,23 +9,46 @@ int main() {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	printf("Developed by KATEHOK (https://github.com/KATEHOK)\nPlease enjoy!\n\n");
 
-	while (1 == 1) {
-		TablesList* pTL = tablesListInit();
-
-		Table* pTable = createTable(16, 4);
-		status = tablesListAddItem(pTL, pTable);
-		pTable = createTable(16, 4);
-		status = tablesListAddItem(pTL, pTable);
-		pTable = createTable(16, 4);
-		status = tablesListAddItem(pTL, pTable);
-		pTable = createTable(16, 4);
-		status = tablesListAddItem(pTL, pTable);
-		struct TablesItem* pItem = pTL->pTop;
-		tablesListPrint(pTL);
-
-		status = tablesListDelete(pTL);
+	status = startConsole();
+	if (status == 2) {
+		printf("See You later!\n");
 		system("pause");
-		printf("\n");
+		return 0;
 	}
+
+	TablesList* pTL = tablesListInit();
+
+	while (1 == 1) {
+		char** ppList[3] = {"New table", "Select table", "Exit"};
+		printf("\n---Main menu---\n");
+		status = console("What do You want to do?", ppList, 3);
+		if (status == 3) {
+			printf("\n");
+			status = exitConsole(pTL);
+			if (status == 0)
+				return;
+			printf("\n");
+		} else if (status == 2) {
+			Table* pTable = selectTableConsole(pTL);
+			if (pTable == NULL)
+				continue;
+			status = processSelectedTable(pTable);
+			if (status == 1)
+				break;
+		} else if (status == 1) {
+			status = addTableConsole(pTL);
+			if (status == 1)
+				printf("New table was not added!\n");
+			else
+				printf("New table was added successfully!\n");
+		} else {
+			printf("|-> Structure of the list of tables was corrupted!\n");
+			break;
+		}
+	}
+
+	status = tablesListDelete(pTL);
+	printf("See You later!\n");
+	system("pause");
 	return 0;
 }

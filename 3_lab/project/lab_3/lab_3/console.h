@@ -65,4 +65,14 @@ Table* selectTableConsole(TablesList*);
 
 int processSelectedTable(Table*);
 
+/*
+* Меню добавления новой таблицы
+* Параметры:
+* (TablesList*) pTL - указатель на список таблиц.
+* Вернет:
+* 0 - успешно;
+* 1 - не успешно (pTable == NULL);
+* 2 - не успешно (таблица уже в списке);
+* 3 - не успешно (отказ в выделении памяти).
+*/
 int addTableConsole(TablesList*);

@@ -32,9 +32,11 @@ int main() {
 			Table* pTable = selectTableConsole(pTL);
 			if (pTable == NULL)
 				continue;
-			status = processSelectedTable(pTable);
-			if (status == 1)
+			status = processSelectedTable(pTable, pTL);
+			if (status == 1) {
+				printf("|-> Error!\n");
 				break;
+			}
 		} else if (status == 1) {
 			status = addTableConsole(pTL);
 			if (status == 1)
@@ -46,7 +48,6 @@ int main() {
 			break;
 		}
 	}
-
 	status = tablesListDelete(pTL);
 	printf("See You later!\n");
 	system("pause");

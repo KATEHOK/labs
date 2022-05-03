@@ -63,8 +63,6 @@ int exitConsole(TablesList*);
 */
 Table* selectTableConsole(TablesList*);
 
-int processSelectedTable(Table*);
-
 /*
 * Меню добавления новой таблицы
 * Параметры:
@@ -76,3 +74,5 @@ int processSelectedTable(Table*);
 * 3 - не успешно (отказ в выделении памяти).
 */
 int addTableConsole(TablesList*);
+
+int processSelectedTable(Table*, TablesList*);

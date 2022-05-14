@@ -2,6 +2,15 @@
 #include "app.h"
 #endif
 
+int delete(Container* pContainer) {
+	if (pContainer == NULL || pContainer->pKey == NULL || pContainer->pTable == NULL)
+		return 1;
+	remove(pContainer->pTable->name);
+	free(pContainer->pKey);
+	free(pContainer->pTable);
+	free(pContainer);
+	return 0;
+}
 
 int init(Container** ppContainer, char* pName, int maxKeyCount) {
 	int status, tmp = 0;
@@ -20,8 +29,8 @@ int init(Container** ppContainer, char* pName, int maxKeyCount) {
 
 int insertItem(Container* pContainer, int key, int info) {
 	int status;
-	status = tInsertItem(pContainer, key, info);
-	if (status != 0)
+	status = tInsertItem(pContainer, key);
+	if (status < 0)
 		return abs(status);
 	status = fInsertItem(pContainer->pTable, key, status, info);
 	if (status == 1) {
@@ -63,7 +72,7 @@ int getInfo(Container* pContainer, int* pKey_pId_pInfo) {
 	status = tSearchItem(pContainer, pKey_pId_pInfo);
 	if (status != 0)
 		return status;
-	status = fGetInfo(pContainer, pKey_pId_pInfo);
+	status = fGetInfo(pContainer->pTable, pKey_pId_pInfo);
 	if (status != 0)
 		return 3;
 	return 0;
@@ -78,17 +87,26 @@ int printItem(Container* pContainer, int key_info) {
 }
 
 int print(Container* pContainer) {
-	int* pInfo, status, id;
+	int status, *pInfo;
+	char key[4] = "Key", info[5] = "Info";
 	status = fGetAllInfo(pContainer->pTable, &pInfo);
 	if (status != 0)
 		return status;
-	if (pContainer->pTable->keysCount > 0)
-		printf("\n* Table: %s\n*   key   *   info   *\n", pContainer->pTable->name);
-	else
-		printf("\nTable: %s - is free!\n", pContainer->pTable->name);
-	for (id = 0; id < pContainer->pTable->keysCount; id++)
-		printf("* %7d * %8d *\n", pContainer->pKey[id], pInfo[id]);
+	if (pContainer->pTable->keysCount == 0) {
+		printf("\nTable %s is free!\n\n", pContainer->pTable->name);
+		return 0;
+	}
+	printf("\nTable: %s\n", pContainer->pTable->name);
+	printf("%7s * %7s * id\n", key, info);
+	for (status = 0; status < pContainer->pTable->keysCount; status++)
+		printf("%7d | %7d | %2d\n", pContainer->pKey[status], pInfo[status], status);
 	printf("\n");
 	free(pInfo);
 	return 0;
+}
+
+int open(Container** ppContainer, char* pName) {
+	int status;
+	status = download(pName, ppContainer);
+	return status;
 }

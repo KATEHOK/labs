@@ -11,7 +11,7 @@ int tInit(Container** ppContainer, char* pName, int maxKeysCount) {
 		free(*ppContainer);
 		return 1;
 	}
-	(*ppContainer)->pKey = (int*)malloc(sizeof(int));
+	(*ppContainer)->pKey = (int*)malloc(sizeof(int) * maxKeysCount);
 	if ((*ppContainer)->pKey == NULL) {
 		free((*ppContainer)->pTable);
 		free(*ppContainer);
@@ -26,7 +26,6 @@ int tInit(Container** ppContainer, char* pName, int maxKeysCount) {
 int tDelete(Container* pContainer) {
 	if (pContainer == NULL || pContainer->pKey == NULL || pContainer->pTable == NULL)
 		return 1;
-	remove(pContainer->pTable->name);
 	free(pContainer->pTable);
 	free(pContainer->pKey);
 	free(pContainer);
@@ -39,21 +38,26 @@ int tSearchItem(Container* pContainer, int* pKey_pId) {
 		return 1;
 	if (pContainer->pTable->keysCount == 0)
 		return 2;
-	while (maxId > minId) {
+	if (pContainer->pKey[0] == *pKey_pId) {
+		*pKey_pId = 0;
+		return 0;
+	}
+	while (maxId >= minId) {
 		middle = (maxId + minId) / 2;
 		if (pContainer->pKey[middle] > *pKey_pId)
 			maxId = middle - 1;
 		else if (pContainer->pKey[middle] < *pKey_pId)
-			maxId = middle + 1;
+			minId = middle + 1;
 		else {
 			*pKey_pId = middle;
 			return 0;
 		}
 	}
+	//printf("kc = %d\n", pContainer->pTable->keysCount);
 	return 2;
 }
 
-int tInsertItem(Container* pContainer, int key, int info) {
+int tInsertItem(Container* pContainer, int key) {
 	int status, id = key;
 	status = tSearchItem(pContainer, &id);
 	if (status == 1)
@@ -63,15 +67,16 @@ int tInsertItem(Container* pContainer, int key, int info) {
 	if (pContainer->pTable->keysCount == pContainer->pTable->maxKeysCount)
 		return -3;
 	id = pContainer->pTable->keysCount - 1;
-	while (id >= 0 && pContainer->pKey[id] > key) {
-		pContainer->pKey[id + 1] = pContainer->pKey[id];
-		id--;
-	}
-	if (id < 0)
-		id++;
+	if (pContainer->pKey[id] > key)
+		while (id >= 0 && pContainer->pKey[id] > key) {
+			pContainer->pKey[id + 1] = pContainer->pKey[id];
+			id--;
+		}
+	id++;
 	pContainer->pKey[id] = key;
 	pContainer->pTable->keysCount++;
-	return 0;
+	//printf("id = %d, kc = %d\n", id, pContainer->pTable->keysCount);
+	return id;
 }
 
 int tDeleteItem(Container* pContainer, int key) {
@@ -81,6 +86,7 @@ int tDeleteItem(Container* pContainer, int key) {
 	for (id = key; id < pContainer->pTable->keysCount - 1; id++)
 		pContainer->pKey[id] = pContainer->pKey[id + 1];
 	pContainer->pTable->keysCount--;
+	//printf("id = %d, kc = %d\n", key, pContainer->pTable->keysCount);
 	return key;
 }
 

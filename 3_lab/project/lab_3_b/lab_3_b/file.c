@@ -37,38 +37,34 @@ int upload(Container* pContainer, int* pInfo) {
 	return 0;
 }
 
-int download(char* pName, Table** ppTable, int** ppKey) {
-	int err, i;
-	long offset;
+int download(char* pName, Container** ppContainer) {
+	int err, i, count;
+	long offset = sizeof(char) * 16 + sizeof(int);
 	FILE* pFile;
 	FileItem fileItem;
 	err = fopen_s(&pFile, pName, "r");
 	if (err != 0 )
 		return 1;
-	rewind(pFile);
-	*ppTable = (Table*)malloc(sizeof(Table));
-	if (*ppTable == NULL) {
+	fseek(pFile, offset, SEEK_SET);
+	fread(&count, sizeof(int), 1, pFile);
+	err = tInit(ppContainer, pName, count);
+	if (err == 1) {
 		fclose(pFile);
 		return 2;
 	}
+	rewind(pFile);
 	if (!feof(pFile))
-		fread(*ppTable, sizeof(Table), 1, pFile);
+		fread((*ppContainer)->pTable, sizeof(Table), 1, pFile);
 	else {
 		fclose(pFile);
-		free(*ppTable);
+		tDelete(*ppContainer);
 		return 3;
 	}
-	*ppKey = (int*)malloc((*ppTable)->maxKeysCount * sizeof(int));
-	if (*ppKey == NULL) {
-		fclose(pFile);
-		free(*ppTable);
-		return 2;
-	}
 	offset = sizeof(Table);
-	for (i = 0; i < (*ppTable)->keysCount; i++) {
+	for (i = 0; i < (*ppContainer)->pTable->keysCount; i++) {
 		fseek(pFile, offset, SEEK_SET);
 		fread(&fileItem, sizeof(FileItem), 1, pFile);
-		(*ppKey)[i] = fileItem.key;
+		(*ppContainer)->pKey[i] = fileItem.key;
 		offset += sizeof(FileItem);
 	}
 	fclose(pFile);
@@ -101,7 +97,7 @@ int fInsertItem(Table* pTable, int key, int id, int info) {
 }
 
 int fDeleteItem(Table* pTable, int id) {
-	long offsetCounter, offsetMax = sizeof(Table) + (pTable->keysCount - 1) * sizeof(FileItem);
+	long offsetCounter, offsetMax = sizeof(Table) + (pTable->keysCount) * sizeof(FileItem);
 	FILE* pFile;
 	int err;
 	FileItem fileItem;

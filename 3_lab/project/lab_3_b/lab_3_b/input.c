@@ -19,7 +19,7 @@ int getNum(int* pNum)
             // обнаружен конец файла
             scanf_s("%*c[^\n]");
             scanf_s("%*c");
-            printf("|-> EOF detacted!\n");
+            printf("|-> EOF detected!\n");
             return 1;
         }
     } while (status == 0);
@@ -44,4 +44,18 @@ int getInt(int* pNum) {
     printf("Enter integer number\n");
     status = getNum(pNum);
     return status;
+}
+
+int getStr(char** ppStr) {
+    int status;
+    printf("Enter string <= 15 symbols\n");
+    status = scanf_s("%15s", *ppStr, (unsigned)(16 * sizeof(char)));
+    if (status < 0) {
+        // обнаружен конец файла
+        scanf_s("%*c[^\n]");
+        scanf_s("%*c");
+        printf("|-> EOF detected!\n");
+        return 1;
+    }
+    return 0;
 }

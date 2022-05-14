@@ -118,13 +118,13 @@ int fDeleteItem(Table* pTable, int id) {
 }
 
 int fCopyRange(Table* pTableSource, Table* pTableDestination, int idFrom) {
-	FILE* pSource, *pDestination;
+	FILE *pSource, *pDestination;
 	FileItem* pFileItem;
 	int err, itemsCount = pTableDestination->keysCount;
 	err = fopen_s(&pSource, pTableSource->name, "r");
 	if (err != 0)
 		return 1;
-	err = fopen_s(&pDestination, pTableSource->name, "w");
+	err = fopen_s(&pDestination, pTableDestination->name, "w");
 	if (err != 0) {
 		fclose(pSource);
 		return 2;
@@ -144,6 +144,7 @@ int fCopyRange(Table* pTableSource, Table* pTableDestination, int idFrom) {
 	fwrite(pFileItem, itemsCount * sizeof(FileItem), 1, pDestination);
 	fclose(pSource);
 	fclose(pDestination);
+	free(pFileItem);
 	return 0;
 }
 

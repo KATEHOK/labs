@@ -2,17 +2,6 @@
 #include "app.h"
 #endif
 
-/*
-* выводит список деймтвий и запрашивает действие
-* Параметры:
-* (char*) pQuestion - вопрос к пользователю;
-* (char**) ppArray - массив вариантов действий;
-* (int) len - длина массива.
-* Вернет:
-* -1 - конец файла;
-* 0 - выход;
-* >0 - действие.
-*/
 int console(char* pQuestion, char** ppArray, int len) {
 	int i, answer = len + 1;
 	char* msg = "";
@@ -195,9 +184,8 @@ int dGetName(char** ppName) {
 }
 
 int dCopyRange(Container* pContainer, Container** ppNew) {
-	char** ppList[2] = {"Stay with parent table", "Switch on the new table"};
 	int status, minKey, maxKey;
-	char pName = (char*)malloc(16 * sizeof(char));
+	char* pName = (char*)malloc(16 * sizeof(char));
 	if (pName == NULL)
 		return 2;
 	printf("\nEnter name of new file\n");
@@ -232,10 +220,7 @@ int dCopyRange(Container* pContainer, Container** ppNew) {
 		return 3;
 	}
 	printf("Successfuly!\n\n");
-	status = console("What do You want to do?", ppList, 2);
-	printf("\n");
-	if (status != 2)
-		return 3;
+	status = tDelete(*ppNew);
 	return 0;
 }
 
@@ -359,16 +344,8 @@ int dProcessTable(Container* pContainer) {
 			break;
 		case 6:
 			status = dCopyRange(pContainer, &pNew);
-			if (status == 0) {
-				free(pContainer->pKey);
-				free(pContainer->pTable);
-				free(pContainer);
-				pContainer = pNew;
-			}
-			if (status <= 2) {
-				status = delete(pContainer);
+			if (status != 0)
 				return 1;
-			}
 			break;
 		}
 		status = console("What do You want to do with the table?", ppList, 6);

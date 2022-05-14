@@ -109,8 +109,8 @@ int tCopyRange(Container* pSource, Container** ppDestination, int minKey, int ma
 				minId = id;
 			(*ppDestination)->pKey[i] = pSource->pKey[id];
 			(*ppDestination)->pTable->keysCount++;
+			i++;
 		}
-		i++;
 	}
 	return minId;
 }

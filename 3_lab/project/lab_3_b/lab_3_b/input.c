@@ -50,7 +50,7 @@ int getStr(char** ppStr) {
     int status;
     printf("Enter string <= 15 symbols\n");
     status = scanf_s("%15s", *ppStr, (unsigned)(16 * sizeof(char)));
-    if (status < 0) {
+    if (status <= 0) {
         // обнаружен конец файла
         scanf_s("%*c[^\n]");
         scanf_s("%*c");

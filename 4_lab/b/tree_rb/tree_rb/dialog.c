@@ -44,7 +44,8 @@ int dInsert(Tree* pTree) {
 		return 2;
 	}
 	
-	printf("Added: (%d, %s)\n", pNode->key, pNode->pInfo);
+	printf("Added: (%d, %s)\n", pNode->key, pInfo);
+	free(pInfo);
 	return 0;
 }
 
@@ -58,7 +59,7 @@ int dDeleteNode(Tree* pTree) {
 		return 1;
 	}
 
-	status = nodeDelete(pTree->pRoot, key);
+	status = nodeDelete(pTree, key);
 	if (status == 0) printf("Deleted: %d\n", key);
 	else printf("Key '%d' is not exist\n", key);
 
@@ -66,7 +67,7 @@ int dDeleteNode(Tree* pTree) {
 }
 
 int dPrintNode(Tree* pTree) {
-	int key, version, status;
+	int key, status;
 	Node* pNode;
 
 	printf("\nEnter key\n");
@@ -76,16 +77,13 @@ int dPrintNode(Tree* pTree) {
 		return 1;
 	}
 
-	printf("Enter version\n");
-	status = getNat(&version);
-	if (status == 1) {
-		treeDelete(pTree);
-		return 1;
+	pNode = search(pTree->pRoot, pTree->pEList, key, 1, NULL);
+	if (pNode != NULL) {
+		printf("Searched! Key: %d\n", pNode->key);
+		infoListPrint(pNode->pInfo);
+		printf("\n");
 	}
-
-	pNode = search(pTree->pRoot, key, version);
-	if (pNode != NULL) printf("Searched!\nKey: %d\nInfo: %s", pNode->key, pNode->pInfo);
-	else printf("The %d node with key '%d' is not exist.\n", version, key);
+	else printf("The node with key '%d' is not exist.\n", key);
 
 	return 0;
 }
@@ -103,10 +101,8 @@ int dDelete(Tree* pTree) {
 		return 2;
 	}
 
-	status = treeDelete(pTree);
-	if (status == 1) printf("Wrong structure!\n");
-	else printf("The tree was deleted.\n");
-
+	treeDelete(pTree);
+	printf("The tree was deleted.\n");
 	return 0;
 }
 
@@ -122,8 +118,7 @@ Tree* dDownload() {
 	}
 
 	pTree = download(pName);
-	if (pTree == NULL)
-		printf("The file '%s' is not exist or memory request was declined!\n", pName);
+	if (pTree == NULL) printf("The file '%s' is not exist or memory request was declined!\n", pName);
 	else printf("The file '%s' was opened successfuly!\n", pName);
 
 	free(pName);
@@ -142,7 +137,7 @@ Tree* dInit() {
 int dWalk(Tree* pTree) {
 	int key = 0, isKeyCorrect = 0, status;
 
-	printf("\nEnter 0, if you want to enter max 'not walking' key\n");
+	printf("\nEnter 0 if you want to enter max 'not walking' key, or another to show all keys\n");
 	status = getInt(&isKeyCorrect);
 	if (status == 1) {
 		treeDelete(pTree);
@@ -157,14 +152,15 @@ int dWalk(Tree* pTree) {
 			treeDelete(pTree);
 			return 1;
 		}
+		key = abs(key);
 	}
 
-	walk(pTree->pRoot, key, isKeyCorrect);
+	detour(pTree->pRoot, pTree->pEList, key, isKeyCorrect);
 	return 0;
 }
 
 int dSearchSpecial(Tree* pTree) {
-	int key, version, status;
+	int key, status;
 	Node* pNode;
 
 	printf("\nEnter key\n");
@@ -174,17 +170,13 @@ int dSearchSpecial(Tree* pTree) {
 		return 1;
 	}
 
-	printf("Enter version\n");
-	status = getNat(&version);
-	if (status == 1) {
-		treeDelete(pTree);
-		return 1;
+	pNode = searchSpecial(pTree->pRoot, pTree->pEList, key, NULL);
+	if (pNode == NULL) printf("Wrong structure!\n");
+	else {
+		printf("Searched! Key: %d\n", pNode->key);
+		infoListPrint(pNode->pInfo);
+		printf("\n");
 	}
-
-	pNode = searchSpecial(pTree->pRoot, key, version);
-	printf("Done\n");
-	if (pNode == NULL) printf("Wrong structure or this version of node is not exist!\n");
-	else printf("Searched!\nKey: %d\nInfo: %s", pNode->key, pNode->pInfo);
 
 	return 0;
 }
@@ -222,7 +214,7 @@ int dProcess(Tree* pTree) {
 			if (dSearchSpecial(pTree) == 1) return 1;
 			break;
 		case 6:
-			printAsTree(pTree->pRoot, 0);
+			printAsTree(pTree->pRoot, pTree->pEList, 0);
 			break;
 		case 7:
 			if (dWalk(pTree) == 1) return 1;

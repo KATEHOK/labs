@@ -72,6 +72,12 @@ void treeDelete(Tree* pTree);
 void nodesDelete(Node* pNode, Node* pEList);
 
 /*
+* Выводит список информаций:
+* (Info*) pInfo - указатель на элемент списка, с которого начинается удаление.
+*/
+void infoListPrint(Info* pInfo);
+
+/*
 * Удаляет список информаций:
 * (Info*) pInfo - указатель на элемент списка, с которого начинается удаление.
 */
@@ -82,9 +88,9 @@ void infoListDelete(Info* pInfo);
 * (Node*) pNode - указатель на узел;
 * (Node*) pEList - указатель на лист;
 * (int) keyEnd - максимальный ключ, который будет распечатан;
-* (int) isKeyStartCorrect - если не равен нулю, печатает все дерево.
+* (int) isKeyEndCorrect - если не равен нулю, печатает все дерево.
 */
-void detour(Node* pNode, Node* pEList, int keyStart, int isKeyStartCorrect);
+void detour(Node* pNode, Node* pEList, int keyEnd, int isKeyEndCorrect);
 
 /*
 * Рекурсивно ищет узел по ключу и версии:
@@ -114,12 +120,13 @@ Node* insertNotFirst(Tree* pTree, int key, char* pTxt);
 /*
 * Ищет родительский элемент для нового ключа:
 * (Node*) pNode - указатель на узел;
+* (Node*) pEList указатель на лист;
 * (int) key - новый ключ;
 * (int*) pLR - указатель, куда записать метку ребенка (-1 - возвращаемый ключ, 0 - left, 1 - right).
 * Вернет:
 * (Node*) - искомый указатель.
 */
-Node* searchFunnyFather(Node* pNode, int key, int* pLR);
+Node* searchFunnyFather(Node* pNode, Node* pEList, int key, int* pLR);
 
 /*
 * Вставляет первый узел СТРОГО В ПУСТОЕ дерево:
@@ -170,23 +177,71 @@ void rotateLeft(Tree* pTree, Node* pA);
 void rotateRight(Tree* pTree, Node* pB);
 
 /*
+* Поочередно вызывает два левых поворота:
+* (Tree*) pTree - указатель на дерево;
+* (Node*) pFirst - указатель на первый узел;
+* (Node*) pSecond - указатель на второй узел.
+*/
+void rotateLeftLeft(Tree* pTree, Node* pFirst, Node* pSecond);
+
+/*
+* Поочередно вызывает два правых поворота:
+* (Tree*) pTree - указатель на дерево;
+* (Node*) pFirst - указатель на первый узел;
+* (Node*) pSecond - указатель на второй узел.
+*/
+void rotateRightRight(Tree* pTree, Node* pFirst, Node* pSecond);
+
+/*
+* Поочередно вызывает два поворота:
+* (Tree*) pTree - указатель на дерево;
+* (Node*) pLeft - указатель на узел для левого поворота;
+* (Node*) pRight - указатель на узел для правого поворота.
+*/
+void rotateLeftRight(Tree* pTree, Node* pLeft, Node* pRight);
+
+/*
+* Поочередно вызывает два поворота:
+* (Tree*) pTree - указатель на дерево;
+* (Node*) pRight - указатель на узел для правого поворота;
+* (Node*) pLeft - указатель на узел для левого поворота.
+*/
+void rotateRightLeft(Tree* pTree, Node* pRight, Node* pLeft);
+
+/*
 * Балансирует дерево после вставки оригинального ключа (не вызывается после первой вставки):
 * (Tree*) pTree - указатель на дерево;
 * (Node*) pNode - указатель на вставленный (корректируемый) элемент.
 */
 void insertFix(Tree* pTree, Node* pNode);
 
-//TO DO 
-
 /*
 * Корректно удаляет узел по ключу:
-* (Node*) pNode - указатель на поддерево, где находится целевой узел;
+* (Tree*) pTree - указатель на дерево;
 * (int) key - целевой ключ.
 * Вернет:
 * 0 - успешно;
 * 1 - ключ не найден.
 */
-int nodeDelete(Node* pNode, int key);
+int nodeDelete(Tree* pTree, int key);
+
+/*
+* fix-pv-in-right.png
+*/
+void deleteFixRight(Tree* pTree, Node* pParent);
+
+/*
+* fix-pv-in-right.png // зеркально
+*/
+void deleteFixLeft(Tree* pTree, Node* pParent);
+
+/*
+* Балансировка высших уровней.
+* Снизу - баланс. Высота текущего на 1 меньше необходимой.
+* Высота текущего не меньше двух.
+* Текущий - черный.
+*/
+void fixHigher(Tree* pTree, Node* pCurrent, Node* pParent);
 
 /*
 * Рекурсивно ищет узел с максимальным ключом:
@@ -195,11 +250,7 @@ int nodeDelete(Node* pNode, int key);
 * NULL - если pNode == NULL;
 * (Node*) - указатель на искомый узел.
 */
-Node* searchMax(Node* pNode);
-
-/*
-*/
-Node* searchMaxOrEqual(Node* pNode, int key);
+Node* searchMax(Node* pNode, Node* pEList);
 
 /*
 * Рекурсивно ищет узел с минимальным ключом:
@@ -208,18 +259,19 @@ Node* searchMaxOrEqual(Node* pNode, int key);
 * NULL - если pNode == NULL;
 * (Node*) - указатель на искомый узел.
 */
-Node* searchMin(Node* pNode);
+Node* searchMin(Node* pNode, Node* pEList);
 
 /*
-* Ищет узел указанной версии с максимально отличающимся ключом (приоритет минимальному значению):
+* Ищет узел с первым ключом, превышающим заданный:
 * (Node*) pNode - указатель на поддерево, в котором нужно осуществить поиск;
-* (int) key - ключ, от которого максимально должен отличаться ключ искомого узла;
-* (int) version - версия ключа (от 0 до +oo).
+* (Node*) pEList - указатель на лист;
+* (int) key - заданный ключ;
+* (Node*) pMemory - последний "верный ответ".
 * Вернет:
-* NULL - pNode == NULL или указанной версии не существует;
+* NULL - передан NULL или pEList вместо pNode;
 * (Node*) - указатель на искомый узел.
 */
-Node* searchSpecial(Node* pNode, int key, int version);
+Node* searchSpecial(Node* pNode, Node* pEList, int key, Node* pMemory);
 
 /*
 * Считывает из текстового файла данные об дереве:
@@ -235,4 +287,4 @@ Tree* download(char* pPath);
 * (Node*) pNode - узел, с которого начать печать;
 * (int) offset - количество пробелов перед текущим узлом (ставить 0).
 */
-void printAsTree(Node* pNode, int offset);
+void printAsTree(Node* pNode, Node* pEList, int offset);

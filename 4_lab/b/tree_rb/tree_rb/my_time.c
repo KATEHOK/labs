@@ -14,23 +14,6 @@ int* genNumsArray(int count) {
 	return pNums;
 }
 
-char** genStrsArray(int count) {
-	int i;
-	char defaultStr[8] = "default\0";
-	char** ppStr = (char**)malloc(count * sizeof(char*));
-	if (ppStr == NULL) return NULL;
-	for (i = 0; i < count; i++) {
-		ppStr[i] = (char*)malloc(8 * sizeof(char));
-		if (ppStr[i] == NULL) {
-			for (i = i - 1; i >= 0; i--) free(ppStr[i]);
-			free(ppStr);
-			return NULL;
-		}
-		strcpy_s(ppStr[i], 8, defaultStr);
-	}
-	return ppStr;
-}
-
 int printIntoFile(char* pFileName, int size, clock_t time) {
 	FILE* pFile;
 	int trash, status = fopen_s(&pFile, pFileName, "a");
@@ -47,7 +30,7 @@ void checkTime(char* pPath) {
 	int i, j, status, counter, firstPoint = 1, step = 1, pointsCount = 1;
 	int* pKeys;
 	clock_t timeStart, timeFinish, timeRange;
-	char** ppInfo;
+	char pInfo[2] = "0\0";
 	Tree* pTree;
 	remove(pPath);
 
@@ -73,21 +56,10 @@ void checkTime(char* pPath) {
 		return;
 	}
 
-	ppInfo = genStrsArray(firstPoint + step * (pointsCount - 1));
-	if (ppInfo == NULL) {
-		free(pKeys);
-		treeDelete(pTree);
-		printf("Error with generate\n");
-		return;
-	}
-
 	for (counter = 0; counter < firstPoint; counter++) {
-		if (insert(pTree, pKeys[counter], ppInfo[counter]) == NULL) {
+		if (insert(pTree, pKeys[counter], pInfo) == NULL) {
 			free(pKeys);
 			treeDelete(pTree);
-			for (counter = counter; counter < firstPoint + step * (pointsCount - 1); counter++)
-				free(ppInfo[counter]);
-			free(ppInfo);
 			printf("Error with insert\n");
 			return;
 		}
@@ -96,7 +68,7 @@ void checkTime(char* pPath) {
 	timeStart = clock();
 	//вызов поиска
 	for (j = 0; j < firstPoint + step * (pointsCount - 1); j++)
-		search(pTree->pRoot, pKeys[j], ppInfo[j]);
+		search(pTree->pRoot, pTree->pEList, pKeys[j], 1, NULL);
 	timeFinish = clock();
 	timeRange = timeFinish - timeStart;
 	//запись данных в файл GFG.txt
@@ -105,12 +77,9 @@ void checkTime(char* pPath) {
 
 	for (i = 0; i < pointsCount - 1; i++) {
 		for (counter = firstPoint + i * step; counter < firstPoint + (i + 1) * step; counter++) {
-			if (insert(pTree, pKeys[counter], ppInfo[counter]) == NULL) {
+			if (insert(pTree, pKeys[counter], pInfo) == NULL) {
 				free(pKeys);
 				treeDelete(pTree);
-				for (counter = counter; counter < firstPoint + step * (pointsCount - 1); counter++)
-					free(ppInfo[counter]);
-				free(ppInfo);
 				printf("Insert error!\n");
 				return;
 			}
@@ -119,7 +88,7 @@ void checkTime(char* pPath) {
 		timeStart = clock();
 		//вызов поиска
 		for (j = 0; j < firstPoint + step * (pointsCount - 1); j++)
-			search(pTree->pRoot, pKeys[j], ppInfo[i]);
+			search(pTree->pRoot, pTree->pEList, pKeys[j], 1, NULL);
 		timeFinish = clock();
 		timeRange = timeFinish - timeStart;
 		//запись данных в файл GFG.txt
@@ -129,6 +98,5 @@ void checkTime(char* pPath) {
 
 	printf("Success!\n");
 	free(pKeys);
-	free(ppInfo);
 	treeDelete(pTree);
 }
